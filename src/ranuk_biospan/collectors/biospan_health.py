@@ -437,6 +437,19 @@ def compute_healthspan(profile: Dict[str, Any], days: List[Dict[str, Any]]) -> D
     imp_steps = round(max(-0.7, min(0.8, -(avg_steps - 7500.0) / 4500.0)), 2)
     imp_hrv = round(max(-0.8, min(0.9, -(avg_hrv - 65.0) * 0.038)), 2)
 
+    # Ingesta clínica de laboratorio (si existe)
+    clinical_lab = profile.get("clinical_lab") or {}
+    imp_lab = 0.0
+    if clinical_lab:
+        # HOMA-IR > 2.6 suma envejecimiento metabólico (+0.6a), Castelli 3.0 y Glucosa 88 restan (-0.8a)
+        homa = clinical_lab.get("homa_ir", 5.14)
+        castelli = clinical_lab.get("castelli_index", 3.0)
+        gluc = clinical_lab.get("glucose_mg_dl", 88.0)
+        imp_homa = 0.65 if homa > 2.6 else -0.4
+        imp_cardio_lab = -0.7 if castelli <= 3.5 else 0.4
+        imp_gluc = -0.3 if gluc < 95 else 0.5
+        imp_lab = round(imp_homa + imp_cardio_lab + imp_gluc, 2)
+
     biomarkers = [
         {
             "id": "vo2_max",
@@ -511,6 +524,16 @@ def compute_healthspan(profile: Dict[str, Any], days: List[Dict[str, Any]]) -> D
             "status": "optimal" if imp_hrv <= -0.1 else "warning",
         },
     ]
+
+    if clinical_lab:
+        biomarkers.append({
+            "id": "clinical_homa",
+            "label": "Salud Metabólica & Resistencia a Insulina (HOMA-IR)",
+            "value": f"HOMA {clinical_lab.get('homa_ir', 5.14)} · Castelli {clinical_lab.get('castelli_index', 3.0)}",
+            "target": "HOMA ≤ 2.0 · Castelli ≤ 3.5",
+            "impact_years": imp_lab,
+            "status": "warning" if clinical_lab.get("homa_ir", 5.14) > 2.6 else "optimal"
+        })
 
     # Ajuste por solapamiento fisiológico (factor 0.68 igual que el modelo epidemiológico compuesto)
     total_delta = round(sum(b["impact_years"] for b in biomarkers) * 0.68, 1)
@@ -632,6 +655,10 @@ def get_whoop_dashboard() -> Dict[str, Any]:
         prof_row = conn.execute("SELECT * FROM user_profile WHERE id = 1").fetchone()
         profile = dict(prof_row) if prof_row else {}
 
+        lab_row = conn.execute("SELECT * FROM clinical_labs ORDER BY date DESC LIMIT 1").fetchone()
+        clinical_lab = dict(lab_row) if lab_row else {}
+        profile["clinical_lab"] = clinical_lab
+
         rows = conn.execute(
             "SELECT * FROM (SELECT * FROM daily_metrics ORDER BY date DESC LIMIT 35) ORDER BY date ASC"
         ).fetchall()
@@ -639,6 +666,29 @@ def get_whoop_dashboard() -> Dict[str, Any]:
 
         today_data = days[-1] if days else {}
         today_date = today_data.get("date", datetime.date.today().isoformat())
+
+        try:
+            today_dt = datetime.date.fromisoformat(today_date)
+        except Exception:
+            today_dt = datetime.date.today()
+
+        next_blood_dt = datetime.date(2026, 12, 8)
+        next_dental_dt = datetime.date(2026, 12, 15)
+        days_to_blood = (next_blood_dt - today_dt).days
+        days_to_dental = (next_dental_dt - today_dt).days
+
+        medical_schedule = {
+            "blood_type": profile.get("blood_type", "A+"),
+            "allergies": profile.get("allergies", "Alergia a hormigas coloradas"),
+            "last_blood_test": clinical_lab.get("date", "2026-06-08"),
+            "next_blood_test": "2026-12-08",
+            "days_to_blood_test": max(0, days_to_blood),
+            "blood_test_priority": "HOMA-IR (meta < 2.0), Insulina Basal, Glucemia, HbA1c y Perfil Lipídico",
+            "last_dental_check": profile.get("last_dental_check", "2026-06-15"),
+            "dental_status": profile.get("dental_status", "Boca en cero · Sin caries ni foco inflamatorio"),
+            "next_dental_check": "2026-12-15",
+            "days_to_dental": max(0, days_to_dental),
+        }
 
         j_rows = conn.execute("SELECT factor_id, active FROM journal_entries WHERE date = ?", (today_date,)).fetchall()
         active_journal = {r["factor_id"]: bool(r["active"]) for r in j_rows}
@@ -776,6 +826,8 @@ def get_whoop_dashboard() -> Dict[str, Any]:
             "day_strain": base_strain,
         },
         "healthspan": healthspan,
+        "clinical_lab": clinical_lab,
+        "medical_schedule": medical_schedule,
         "history_14d": history_series,
         "journal": journal_items,
         "chat_history": chat_history,
@@ -967,9 +1019,30 @@ def ask_whoop_coach(user_message: str) -> Dict[str, Any]:
         f"- Hábitos marcados hoy: {', '.join(active_habits) if active_habits else 'Ninguno aún'}\n\n"
         "HISTORIAL DE ACTIVIDADES Y ENTRENAMIENTOS REGISTRADOS (ÚLTIMOS 7 DÍAS):\n"
         + "\n".join(recent_workouts_text) + "\n\n"
+        "PANEL CLÍNICO DE SANGRE (Laboratorio Fasolis Aicardi - Protocolo 37314):\n"
+        f"- Glucemia en ayunas: {state.get('clinical_lab', {}).get('glucose_mg_dl', 88.0)} mg/dL (Óptimo: 70-100)\n"
+        f"- Insulinemia basal: {state.get('clinical_lab', {}).get('insulin_basal', 23.7)} uU/mL (Límite superior normal)\n"
+        f"- HOMA-IR: {state.get('clinical_lab', {}).get('homa_ir', 5.14)} (Alerta metabólica: Resistencia a la insulina compensada. Meta longevidad: < 2.0)\n"
+        f"- Hemoglobina Glicosilada (HbA1c): {state.get('clinical_lab', {}).get('hba1c_pct', 5.6)}% (Normal: 4.4 - 6.0%)\n"
+        f"- Perfil Lipídico: Colesterol Total {state.get('clinical_lab', {}).get('cholesterol_total', 177)} mg% | HDL {state.get('clinical_lab', {}).get('hdl', 58)} mg% | LDL {state.get('clinical_lab', {}).get('ldl', 92)} mg% | Triglicéridos {state.get('clinical_lab', {}).get('triglycerides', 134)} mg%\n"
+        f"- Índice de Castelli: {state.get('clinical_lab', {}).get('castelli_index', 3.0)} (Excelente protección cardiovascular, riesgo bajo < 3.5)\n"
+        f"- Filtración Renal: Creatinina {state.get('clinical_lab', {}).get('creatinine', 0.85)} mg% | Uremia {state.get('clinical_lab', {}).get('uremia', 0.32)} g/L (Filtración óptima)\n"
+        f"- Tiroides: TSH {state.get('clinical_lab', {}).get('tsh', 1.56)} uU/mL (Eutiroideo ideal)\n"
+        f"- Hemograma: Hemoglobina {state.get('clinical_lab', {}).get('hemoglobin', 15.2)} g/dL | Hematocrito {state.get('clinical_lab', {}).get('hematocrit', 46.2)}% | Leucocitos {state.get('clinical_lab', {}).get('leukocytes', 8800)}\n\n"
+        "FICHA CLÍNICA & HISTORIAL MÉDICO DE EMILIO:\n"
+        f"- Grupo Sanguíneo: A+\n"
+        "- Alergias Conocidas: Alergia a hormigas coloradas (Solenopsis invicta)\n"
+        "- Salud Dental: Último arreglo integral en Junio 2026 (boca en cero, 100% libre de caries o focos inflamatorios). Próxima revisión preventiva: Diciembre 2026.\n"
+        "- Próximo Chequeo de Sangre: Diciembre 2026 (en 42 días) para reevaluar la evolución de HOMA-IR tras el estímulo de entrenamiento de fuerza.\n\n"
+        "TRIANGULACIÓN FISIOLÓGICA & CONSEJOS METABÓLICOS:\n"
+        "Emilio tiene un perfil cardiovascular de atleta (Castelli 3.0, HDL 58, RHR 51, VO2 Max 52.1, sueño restaurador 4.75h), pero presenta un HOMA-IR de 5.14 por hiperinsulinemia compensatoria. "
+        "Cuando te pregunte sobre entrenamientos, sueño, nutrición o longevidad, relaciona sus métricas del reloj con su HOMA-IR: "
+        "1) El ejercicio de fuerza y ciclismo estimula la captación de glucosa por receptores GLUT-4 sin requerir insulina. "
+        "2) Mantener su recuperación y sueño profundo > 2.5h previene los picos de cortisol matutino que elevan la glucosa. "
+        "3) Evitar cenas pesadas tarde y caminar 10 a 15 minutos tras las comidas principales reduce la demanda pancreática de insulina.\n\n"
         "DIRECTRICES DE RESPUESTA:\n"
-        "1. Tienes acceso COMPLETO a las sesiones de ayer y días previos (tipo de deporte, duración, FC media/máxima, calorías y strain). "
-        "Cuando Emilio pregunte sobre su entrenamiento de ayer o de la semana, cita exactamente esos números reales y analiza cómo impactaron su recuperación de hoy.\n"
+        "1. Tienes acceso COMPLETO a las sesiones de ayer y días previos (tipo de deporte, duración, FC media/máxima, calorías y strain) y a su informe de laboratorio de sangre. "
+        "Cuando Emilio pregunte sobre su salud, entrenamiento o análisis, cita exactamente esos números reales y analiza cómo impactaron su recuperación de hoy.\n"
         "2. Formato: Responde con español profesional. Puedes usar negritas Markdown (**texto**) y listas con guión (- item). "
         "Sé conciso y ve al grano: primero el análisis fisiológico, luego el impacto en longevidad, y finalmente una recomendación concreta para hoy."
     )
