@@ -795,7 +795,7 @@
           STATE = data;
           renderAll();
           const urlParams = new URLSearchParams(window.location.search);
-          if (urlParams.get('connect') === '1') {
+          if (urlParams.get('connect') === '1' && (!STATE.xiaomi_cloud || !STATE.xiaomi_cloud.connected)) {
             openSyncModal();
           }
         }
@@ -1213,6 +1213,9 @@
         document.getElementById('inp-rhr').value = STATE.today.rhr;
         document.getElementById('inp-hrv').value = STATE.today.hrv_ms;
         document.getElementById('inp-steps').value = STATE.today.steps;
+        if (STATE.xiaomi_cloud && STATE.xiaomi_cloud.connected) {
+          showXiaomiFeedback(`✅ <strong>Cuenta Xiaomi Conectada (ID: ${STATE.xiaomi_cloud.user_id})</strong><br/>Región: ${(STATE.xiaomi_cloud.region || 'US').toUpperCase()} · Sincronizados <strong>${STATE.xiaomi_cloud.synced_days} días reales</strong> de Mi Fitness.`, false);
+        }
       }
       document.getElementById('sync-modal').classList.remove('hidden');
     }
