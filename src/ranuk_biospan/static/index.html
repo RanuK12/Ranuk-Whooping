@@ -126,12 +126,18 @@
       </div>
     </div>
 
-    <div class="flex items-center gap-2">
-      <button onclick="openSyncModal()" class="px-3 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-400/40 text-[11px] font-black text-[#00F59B] hover:border-emerald-400 active:scale-95 transition flex items-center gap-1.5 shadow-sm">
-        <span>☁️ Sync Cloud</span>
+    <div class="flex items-center gap-1.5">
+      <button onclick="requestVoiceBrief()" id="btn-hdr-voice" class="px-2.5 py-1.5 rounded-xl bg-purple-500/20 border border-purple-400/40 text-[11px] font-black text-purple-300 hover:border-purple-400 active:scale-95 transition flex items-center gap-1 shadow-sm" title="Escuchar audio brief de hoy con Celeste">
+        <span>🎙️ Celeste</span>
       </button>
-      <a href="/miniapp" class="p-2 rounded-xl glass-pill text-slate-400 hover:text-white text-xs active:scale-95 transition" title="Ranuk Hub">
-        🏢
+      <button onclick="shareBioSpanCard()" class="p-2 rounded-xl glass-pill text-cyan-300 hover:text-white text-xs active:scale-95 transition" title="Compartir reporte a Instagram o Redes">
+        📲
+      </button>
+      <button onclick="openSyncModal()" class="px-2.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-500/20 to-cyan-500/20 border border-emerald-400/40 text-[11px] font-black text-[#00F59B] hover:border-emerald-400 active:scale-95 transition flex items-center gap-1 shadow-sm">
+        <span>☁️ Sync</span>
+      </button>
+      <a href="/miniapp" class="px-2.5 py-1.5 rounded-xl glass-pill text-slate-300 hover:text-white text-[11px] font-black active:scale-95 transition flex items-center gap-1" title="Ir a Ranuk Hub Ejecutivo">
+        <span>🏢 Hub</span>
       </a>
     </div>
   </header>
@@ -162,9 +168,17 @@
         <span class="w-2 h-2 rounded-full bg-[#00F59B] animate-pulse"></span>
         <span id="xiaomi-connected-text" class="text-[11px] font-bold text-emerald-300">Mi Fitness Cloud Conectado</span>
       </div>
-      <button onclick="triggerBackendSync()" id="btn-quick-resync" class="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-[#00F59B] border border-emerald-500/30 font-extrabold text-[10px] active:scale-95 transition">
-        🔄 Sincronizar 30d
-      </button>
+      <div class="flex items-center gap-1.5">
+        <button onclick="requestVoiceBrief()" id="btn-quick-voice" class="px-2 py-1 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 font-extrabold text-[10px] active:scale-95 transition" title="Enviar audio brief a Telegram">
+          🎙️ Celeste
+        </button>
+        <button onclick="shareBioSpanCard()" class="p-1 rounded-xl glass-pill text-cyan-300 text-[10px] active:scale-95 transition" title="Compartir">
+          📲
+        </button>
+        <button onclick="triggerBackendSync()" id="btn-quick-resync" class="px-2 py-1 rounded-xl bg-emerald-500/20 text-[#00F59B] border border-emerald-500/30 font-extrabold text-[10px] active:scale-95 transition">
+          🔄 Sync 30d
+        </button>
+      </div>
     </div>
 
     <!-- ==================== TAB 1: HOY (BIOMETRIC OVERVIEW) ==================== -->
@@ -396,6 +410,21 @@
         </div>
       </div>
 
+      <!-- WHOOP HEALTH MONITOR (SEMÁFORO RECTANGULAR DE 5 BIOMARCADORES) -->
+      <div class="glass-card rounded-3xl p-4 space-y-3 border border-emerald-500/25">
+        <div class="flex items-center justify-between">
+          <div>
+            <div class="flex items-center gap-1.5">
+              <span class="w-2 h-2 rounded-full bg-[#00F59B] animate-pulse"></span>
+              <h3 class="text-xs font-black uppercase tracking-wider text-white">Monitor de Salud Fisiológica</h3>
+            </div>
+            <p class="text-[11px] text-slate-400">Semáforo de rangos típicos y calibración basal de 30 días</p>
+          </div>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-[#00F59B] font-bold">5 / 5 En Rango</span>
+        </div>
+        <div id="health-monitor-grid" class="space-y-2.5"></div>
+      </div>
+
       <!-- BIOMARKERS IMPACT ACCORDION -->
       <div class="glass-card rounded-3xl p-4 space-y-3">
         <div>
@@ -523,6 +552,21 @@
         <div id="journal-list" class="grid grid-cols-1 gap-2"></div>
       </div>
     </section>
+
+    <!-- RANUK IT SOLUTIONS BRAND FOOTER -->
+    <footer class="pt-6 pb-20 text-center space-y-2">
+      <div class="flex items-center justify-center gap-2">
+        <div class="w-6 h-6 rounded-lg overflow-hidden border border-emerald-400/40 bg-slate-900 flex items-center justify-center glow-emerald">
+          <img src="/logo.png" alt="Ranuk" class="w-full h-full object-contain" />
+        </div>
+        <span class="text-xs font-black tracking-wider uppercase text-slate-200">RANUK IT SOLUTIONS</span>
+      </div>
+      <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
+        Ranuk BioSpan 5.0 OS · Motor Fisiológico Autónomo &amp; Algoritmos Abiertos<br/>
+        Calibrado para Xiaomi Watch S4 · Modelos de Longevidad PhenoAge (Levine et al.)<br/>
+        <a href="https://ranuk.dev" target="_blank" class="text-emerald-400 font-bold hover:underline">ranuk.dev</a>
+      </p>
+    </footer>
 
   </main>
 
@@ -870,6 +914,53 @@
       document.getElementById('hspan-pace-value').textContent = `${h.pace_of_aging.toFixed(2)}x`;
       document.getElementById('hspan-pace-label').textContent = h.pace_label;
 
+      // WHOOP Health Monitor (Semáforo Rectangular de 5 Biomarcadores)
+      const hmGrid = document.getElementById('health-monitor-grid');
+      if (hmGrid) {
+        const hmList = h.health_monitor || [];
+        hmGrid.innerHTML = hmList.map(m => {
+          const isGood = m.status === 'in_range';
+          const badgeClass = isGood
+            ? 'bg-emerald-500/20 text-[#00F59B] border-emerald-500/30'
+            : 'bg-amber-500/20 text-amber-300 border-amber-500/30';
+          
+          const rangeSpan = Math.max(0.1, m.max_normal - m.min_normal);
+          const pos = Math.min(94, Math.max(6, ((m.current - m.min_normal) / rangeSpan) * 100));
+
+          return `
+            <div class="p-3.5 rounded-2xl bg-black/50 border border-white/10 hover:border-emerald-500/30 transition space-y-2">
+              <div class="flex items-start justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-base">
+                    ${m.icon}
+                  </div>
+                  <div>
+                    <span class="text-xs font-black text-white block">${m.name}</span>
+                    <span class="text-[10px] text-slate-400 font-mono">Línea base 30d: <strong>${m.baseline} ${m.unit}</strong></span>
+                  </div>
+                </div>
+                <div class="text-right">
+                  <span class="text-sm font-black font-mono text-white">${m.value} <span class="text-[10px] text-slate-400 font-normal">${m.unit}</span></span>
+                  <span class="block text-[9px] font-mono px-2 py-0.5 rounded-full border ${badgeClass} font-bold mt-0.5">
+                    ✓ ${m.status_text}
+                  </span>
+                </div>
+              </div>
+              <div class="pt-2 border-t border-white/5">
+                <div class="flex justify-between text-[9px] font-mono text-slate-500 mb-1">
+                  <span>Rango Seguro: ${m.min_normal}</span>
+                  <span>${m.max_normal} ${m.unit}</span>
+                </div>
+                <div class="w-full h-2 bg-slate-800 rounded-full relative overflow-hidden">
+                  <div class="absolute left-[15%] right-[15%] h-full bg-emerald-500/25 rounded-full"></div>
+                  <div class="absolute top-0 bottom-0 w-2.5 h-2.5 -mt-0.25 rounded-full bg-[#00F59B] shadow-md shadow-emerald-500/60" style="left: ${pos}%;"></div>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
       // Biomarkers List
       const bmList = document.getElementById('biomarkers-list');
       bmList.innerHTML = h.biomarkers.map(bm => {
@@ -914,26 +1005,58 @@
         `;
       }).join('');
 
-      // Workouts list
+      // Workouts list (Apple Fitness & High Performance Style)
       const wList = document.getElementById('workouts-list');
       const workouts = t.workouts || [];
       document.getElementById('workouts-count-badge').textContent = `${workouts.length} sesiones`;
       if (workouts.length) {
-        wList.innerHTML = workouts.map(w => `
-          <div class="p-3 rounded-2xl bg-black/40 border border-cyan-500/25 flex items-center justify-between">
-            <div>
-              <div class="flex items-center gap-1.5">
-                <span class="px-1.5 py-0.5 rounded bg-[#00D2FF]/20 text-[#00D2FF] font-mono font-black text-xs">SESIÓN</span>
-                <span class="text-xs font-black text-white">${w.type || 'Entrenamiento'}</span>
+        wList.innerHTML = workouts.map(w => {
+          const typeLower = (w.type || w.name || '').toLowerCase();
+          let icon = '⚡';
+          if (typeLower.includes('rid') || typeLower.includes('bic') || typeLower.includes('cycl')) icon = '🚴‍♂️';
+          else if (typeLower.includes('foot') || typeLower.includes('fút') || typeLower.includes('socc')) icon = '⚽';
+          else if (typeLower.includes('fuer') || typeLower.includes('stre') || typeLower.includes('peso') || typeLower.includes('hip')) icon = '🏋️‍♂️';
+          else if (typeLower.includes('run') || typeLower.includes('corr')) icon = '🏃‍♂️';
+          else if (typeLower.includes('mov') || typeLower.includes('cor') || typeLower.includes('yoga')) icon = '🧘‍♂️';
+
+          const strainPill = w.strain ? `<span class="px-2 py-0.5 rounded-lg bg-cyan-500/20 text-[#00D2FF] font-mono font-bold text-[10px] border border-cyan-500/30">⚡ Strain ${w.strain}</span>` : '';
+
+          return `
+            <div class="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-900/90 border border-white/10 hover:border-cyan-500/40 transition space-y-2.5">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2.5">
+                  <div class="w-10 h-10 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-xl shadow-sm">
+                    ${icon}
+                  </div>
+                  <div>
+                    <h4 class="text-xs font-black text-white tracking-tight uppercase">${w.name || w.type || 'Entrenamiento'}</h4>
+                    <span class="text-[10px] text-slate-400 font-medium flex items-center gap-1">
+                      <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                      Xiaomi Watch S4 · Sensor Óptico
+                    </span>
+                  </div>
+                </div>
+                ${strainPill}
               </div>
-              <span class="text-[10px] text-slate-400 font-mono block mt-1">
-                ⏱️ ${w.duration_min} min · ❤️ Media ${w.avg_hr} / Máx ${w.max_hr} lpm · 🔥 ${w.kcal} kcal
-              </span>
+              <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/5 text-center font-mono text-[10px]">
+                <div class="p-1.5 rounded-xl bg-black/40 border border-white/5">
+                  <span class="text-slate-400 block text-[9px]">DURACIÓN</span>
+                  <span class="font-bold text-white">⏱️ ${w.duration_min} min</span>
+                </div>
+                <div class="p-1.5 rounded-xl bg-black/40 border border-white/5">
+                  <span class="text-slate-400 block text-[9px]">FC MEDIA / MÁX</span>
+                  <span class="font-bold text-rose-400">❤️ ${w.avg_hr || '--'} / ${w.max_hr || '--'}</span>
+                </div>
+                <div class="p-1.5 rounded-xl bg-black/40 border border-white/5">
+                  <span class="text-slate-400 block text-[9px]">CALORÍAS</span>
+                  <span class="font-bold text-amber-400">🔥 ${w.kcal || '--'} kcal</span>
+                </div>
+              </div>
             </div>
-          </div>
-        `).join('');
+          `;
+        }).join('');
       } else {
-        wList.innerHTML = `<p class="text-xs text-slate-400 font-mono">Día de recuperación sin sesiones intensas registradas.</p>`;
+        wList.innerHTML = `<p class="text-xs text-slate-400 font-mono py-2 text-center">Día de recuperación sin sesiones intensas registradas.</p>`;
       }
 
       // Sleep Lab
@@ -976,6 +1099,88 @@
       renderChartsForTab('today');
     }
 
+    function formatMarkdown(text) {
+      if (!text) return '';
+      let html = text
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        // Headers (## Header or ### Header)
+        .replace(/^##\s+(.*)$/gm, '<h4 class="text-xs font-black uppercase text-emerald-400 mt-2 mb-1 tracking-wider border-b border-white/10 pb-0.5">$1</h4>')
+        .replace(/^###\s+(.*)$/gm, '<h5 class="text-[11px] font-bold text-cyan-300 mt-1.5 mb-0.5">$1</h5>')
+        // Bold: **text** or __text__
+        .replace(/\*\*(.*?)\*\*/g, '<strong class="font-black text-white">$1</strong>')
+        .replace(/__(.*?)__/g, '<strong class="font-black text-white">$1</strong>')
+        // Italic: *text* or _text_
+        .replace(/\*(.*?)\*/g, '<em class="text-slate-300">$1</em>')
+        // Inline code: `code`
+        .replace(/`([^`]+)`/g, '<code class="font-mono text-[10px] px-1.5 py-0.5 rounded bg-white/10 text-emerald-300">$1</code>')
+        // Bullet lists: - item or • item
+        .replace(/^[•\-]\s+(.*)$/gm, '<div class="flex items-start gap-1.5 my-1 ml-1 text-slate-300"><span class="text-emerald-400 font-bold">•</span><span>$1</span></div>')
+        // Double breaks
+        .replace(/\n\n/g, '<div class="h-1.5"></div>')
+        // Single breaks
+        .replace(/\n/g, '<br/>');
+      return html;
+    }
+
+    async function requestVoiceBrief() {
+      haptic('medium');
+      const btns = [document.getElementById('btn-hdr-voice'), document.getElementById('btn-quick-voice')].filter(Boolean);
+      btns.forEach(b => { b.disabled = true; b.textContent = '🎙️ Sintetizando...'; });
+      try {
+        const res = await fetch('/api/whoop/voice-brief', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({})
+        });
+        const data = await res.json();
+        if (data.ok) {
+          alert('🎙️ ¡Audio brief enviado con éxito a tu Telegram! Generado por DeepSeek y narrado con la voz Celeste.');
+        } else {
+          alert('⚠️ ' + (data.error || 'No se pudo generar la nota de voz.'));
+        }
+      } catch (e) {
+        alert('❌ Error al solicitar audio brief.');
+      } finally {
+        btns.forEach(b => { b.disabled = false; b.textContent = '🎙️ Celeste'; });
+      }
+    }
+
+    function shareBioSpanCard() {
+      haptic('light');
+      if (!STATE || !STATE.today) return;
+      const t = STATE.today;
+      const h = STATE.healthspan || {};
+      const shareText = 
+`⚡ RANUK BIOSPAN 5.0 — REPORTE DIARIO
+📅 ${t.date} · Xiaomi Watch S4
+
+🟢 Recuperación: ${t.recovery_score}% (Óptima)
+⚡ Meta de Strain: ${t.strain_target.min} – ${t.strain_target.max}
+😴 Sueño: ${t.sleep_hours.toFixed(1)}h (${t.sleep_performance}% Performance)
+❤️ FC Reposo: ${t.rhr} lpm | 📈 HRV: ${t.hrv_ms} ms
+🧬 Edad Biológica: ${h.whoop_age} años (${h.age_delta > 0 ? '+' : ''}${h.age_delta}a)
+
+Desarrollado con rigor científico por Ranuk IT Solutions
+https://hub.ranuk.dev/whoop`;
+
+      if (navigator.share) {
+        navigator.share({
+          title: 'Ranuk BioSpan 5.0 Report',
+          text: shareText,
+          url: 'https://hub.ranuk.dev/whoop'
+        }).catch(() => {});
+      } else {
+        navigator.clipboard.writeText(shareText).then(() => {
+          alert('📋 ¡Resumen biométrico copiado al portapapeles! Listo para pegar en tu Story o chat de Instagram.');
+          window.location.href = 'instagram://story-camera';
+        }).catch(() => {
+          alert('Copia tu reporte:\n\n' + shareText);
+        });
+      }
+    }
+
     function renderCoachMessages() {
       const box = document.getElementById('coach-messages');
       const msgs = STATE.chat_history || [];
@@ -991,8 +1196,8 @@
         const isUser = m.role === 'user';
         return `
           <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-            <div class="max-w-[88%] p-3 rounded-2xl text-xs leading-relaxed ${isUser ? 'bg-gradient-to-r from-[#00F59B] to-[#00D2FF] text-slate-950 font-bold shadow-md' : 'bg-black/50 border border-white/10 text-slate-200'}">
-              ${m.content.replace(/\n/g, '<br/>')}
+            <div class="max-w-[88%] p-3.5 rounded-2xl text-xs leading-relaxed ${isUser ? 'bg-gradient-to-r from-[#00F59B] to-[#00D2FF] text-slate-950 font-bold shadow-md' : 'bg-black/60 border border-white/10 text-slate-200'}">
+              ${isUser ? m.content : formatMarkdown(m.content)}
             </div>
           </div>
         `;

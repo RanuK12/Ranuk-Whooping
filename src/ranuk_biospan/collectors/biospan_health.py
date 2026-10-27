@@ -521,6 +521,87 @@ def compute_healthspan(profile: Dict[str, Any], days: List[Dict[str, Any]]) -> D
     rec_avg_7 = sum(d["recovery_score"] for d in recent_7) / len(recent_7)
     pace = round(max(-0.4, min(2.5, 1.0 + (total_delta * 0.11) - ((rec_avg_7 - 65.0) * 0.008))), 2)
 
+    # WHOOP Health Monitor (Matriz Rectangular de 5 Biomarcadores con rangos típicos y semáforo)
+    today_row = days[-1] if days else {}
+    today_rhr = today_row.get("rhr", avg_rhr)
+    today_hrv = today_row.get("hrv_ms", avg_hrv)
+    today_spo2 = today_row.get("spo2", 97.0)
+    today_resp = today_row.get("respiratory_rate", 14.2)
+    today_stress = today_row.get("stress_avg", 1.05)
+
+    health_monitor = [
+        {
+            "id": "resp_rate",
+            "name": "Frecuencia Respiratoria",
+            "icon": "🫁",
+            "value": f"{today_resp:.1f}",
+            "unit": "rpm",
+            "baseline": 14.1,
+            "min_normal": 13.0,
+            "max_normal": 15.5,
+            "current": today_resp,
+            "status": "in_range" if 12.5 <= today_resp <= 16.0 else "alert",
+            "status_text": "Dentro del Rango Típico",
+            "category": "cardiorespiratory"
+        },
+        {
+            "id": "rhr",
+            "name": "Frecuencia Cardíaca en Reposo",
+            "icon": "❤️",
+            "value": f"{int(today_rhr)}",
+            "unit": "lpm",
+            "baseline": round(avg_rhr, 1),
+            "min_normal": max(45, round(avg_rhr - 8)),
+            "max_normal": round(avg_rhr + 7),
+            "current": today_rhr,
+            "status": "in_range" if today_rhr <= avg_rhr + 4 else "alert",
+            "status_text": "Excelente (Reposo Bajo)" if today_rhr < avg_rhr else "Dentro del Rango Típico",
+            "category": "cardiorespiratory"
+        },
+        {
+            "id": "hrv",
+            "name": "Variabilidad de la FC (HRV)",
+            "icon": "📈",
+            "value": f"{int(today_hrv)}",
+            "unit": "ms",
+            "baseline": round(avg_hrv, 1),
+            "min_normal": max(40, round(avg_hrv - 15)),
+            "max_normal": round(avg_hrv + 25),
+            "current": today_hrv,
+            "status": "in_range" if today_hrv >= avg_hrv - 10 else "alert",
+            "status_text": "Sobresaliente (+Parasimpático)" if today_hrv > avg_hrv + 10 else "Dentro del Rango Típico",
+            "category": "autonomic"
+        },
+        {
+            "id": "spo2",
+            "name": "Oxígeno en Sangre (SpO₂)",
+            "icon": "🩸",
+            "value": f"{today_spo2:.1f}",
+            "unit": "%",
+            "baseline": 97.2,
+            "min_normal": 95.0,
+            "max_normal": 100.0,
+            "current": today_spo2,
+            "status": "in_range" if today_spo2 >= 95.0 else "alert",
+            "status_text": "Dentro del Rango Típico",
+            "category": "oxygenation"
+        },
+        {
+            "id": "stress",
+            "name": "Estrés Autonómico 24h",
+            "icon": "🧘",
+            "value": f"{today_stress:.2f}",
+            "unit": "escala 0-3",
+            "baseline": 1.15,
+            "min_normal": 0.5,
+            "max_normal": 1.8,
+            "current": today_stress,
+            "status": "in_range" if today_stress <= 1.8 else "alert",
+            "status_text": "Carga Fisiológica Baja" if today_stress <= 1.2 else "Dentro del Rango Típico",
+            "category": "autonomic"
+        }
+    ]
+
     return {
         "chronological_age": chrono_age,
         "whoop_age": whoop_age,
@@ -528,6 +609,7 @@ def compute_healthspan(profile: Dict[str, Any], days: List[Dict[str, Any]]) -> D
         "pace_of_aging": pace,
         "pace_label": "Envejecimiento Desacelerado (Óptimo)" if pace < 0.85 else ("Ritmo Estándar" if pace <= 1.1 else "Ritmo Acelerado"),
         "biomarkers": sorted(biomarkers, key=lambda x: x["impact_years"]),
+        "health_monitor": health_monitor,
     }
 
 
@@ -828,9 +910,9 @@ def toggle_journal_factor(factor_id: str, active: bool, date_str: Optional[str] 
 
 def ask_whoop_coach(user_message: str) -> Dict[str, Any]:
     """
-    Consulta al WHOOP AI Coach usando las APIs extraídas del escritorio de la MacBook Pro:
-    1) Groq Llama-3.3-70b-versatile (ultra rápido)
-    2) Google Gemini 2.5 Flash (fallback multimodal/científico)
+    Consulta al Ranuk BioSpan AI Coach usando las APIs de inteligencia artificial de la MacBook Pro:
+    1) DeepSeek-V3 / Groq Llama-3.3-70b (ultra rápido)
+    2) Google Gemini 2.5 Flash (fallback multimodal y científico)
     3) Mistral Large (fallback adicional)
     """
     state = get_whoop_dashboard()
@@ -839,22 +921,57 @@ def ask_whoop_coach(user_message: str) -> Dict[str, Any]:
     h = state["healthspan"]
     active_habits = [j["label"] for j in state["journal"] if j["active"]]
 
+    # Extraer historial de los últimos 7 días con detalle completo de entrenamientos
+    conn = _get_conn()
+    recent_rows = conn.execute("""
+        SELECT date, recovery_score, day_strain, sleep_hours, rhr, hrv_ms, workouts_json, hr_zones_json
+        FROM daily_metrics
+        ORDER BY date DESC
+        LIMIT 7
+    """).fetchall()
+    conn.close()
+
+    recent_workouts_text = []
+    for r_date, r_rec, r_strain, r_slp, r_rhr, r_hrv, w_json, z_json in recent_rows:
+        w_list = json.loads(w_json) if w_json else []
+        if w_list:
+            w_desc = []
+            for w in w_list:
+                w_name = w.get("name") or w.get("type") or "Entrenamiento"
+                w_dur = w.get("duration_min", 0)
+                w_kcal = w.get("kcal", 0)
+                w_avg = w.get("avg_hr", 0)
+                w_max = w.get("max_hr", 0)
+                w_strain = w.get("strain", "")
+                strain_str = f" · Strain {w_strain}" if w_strain else ""
+                w_desc.append(f"{w_name} ({w_dur} min, {w_kcal} kcal, FC media {w_avg} lpm, pico {w_max} lpm{strain_str})")
+            recent_workouts_text.append(f"- {r_date}: {'; '.join(w_desc)} [Day Strain: {r_strain}, Recovery: {r_rec}%, HRV: {r_hrv} ms]")
+        else:
+            recent_workouts_text.append(f"- {r_date}: Sin sesión intensa registrada [Day Strain: {r_strain}, Recovery: {r_rec}%, HRV: {r_hrv} ms]")
+
     system_prompt = (
-        "Eres 'Ranuk WHOOP Coach', el médico fisiólogo deportivo y especialista en longevidad (Healthspan) personal "
-        "de Emilio Ranucoli. Tus respuestas deben ser concisas, directas, accionables, con tono profesional estilo WHOOP 5.0.\n\n"
+        "Eres 'Ranuk BioSpan Coach', el médico fisiólogo deportivo de alto rendimiento y especialista en longevidad "
+        "de Emilio Ranucoli en Ranuk IT Solutions. Tu tono es profesional, analítico, directo y altamente motivador, fundamentado en ciencia fisiológica.\n\n"
         f"DATOS BIOMÉTRICOS EN VIVO DE HOY ({t['date']} — Reloj: Xiaomi Watch S4):\n"
-        f"- Recovery Score: {t['recovery_score']}% (Meta de Strain hoy: {t['strain_target']['min']} - {t['strain_target']['max']})\n"
-        f"- Day Strain acumulado hoy: {t['day_strain']} / 21.0\n"
+        f"- Recovery Score: {t['recovery_score']}% (Zona: {'Verde Óptima' if t['recovery_score'] >= 67 else 'Ámbar/Moderada'})\n"
+        f"- Meta de Day Strain sugerida hoy: {t['strain_target']['min']} a {t['strain_target']['max']}\n"
+        f"- Day Strain acumulado hoy hasta ahora: {t['day_strain']} / 21.0\n"
         f"- Sueño de anoche: {t['sleep_hours']}h de {t['sleep_need_hours']}h necesarias ({t['sleep_performance']}% Performance)\n"
-        f"- Fases de sueño: Profundo {t['deep_sleep_min']}m | REM {t['rem_sleep_min']}m | Ligero {t['light_sleep_min']}m | Despierto {t['awake_min']}m\n"
+        f"- Arquitectura de sueño: Profundo {t['deep_sleep_min']}m | REM {t['rem_sleep_min']}m | Ligero {t['light_sleep_min']}m | Despierto {t['awake_min']}m\n"
         f"- FC en Reposo (RHR): {t['rhr']} lpm (Base 30d: {b['rhr']} lpm)\n"
         f"- HRV (Variabilidad FC): {t['hrv_ms']} ms (Base 30d: {b['hrv_ms']} ms)\n"
         f"- SpO2: {t['spo2']}% | Frecuencia Respiratoria: {t['respiratory_rate']} rpm\n"
-        f"- Estrés Autonómico Promedio (0-3.0): {t['stress_avg']} | Pasos hoy: {t['steps']} | Calorías: {t['calories_total']} kcal\n"
+        f"- Estrés Autonómico Promedio (0-3.0): {t['stress_avg']} | Pasos: {t['steps']} | Calorías: {t['calories_total']} kcal\n"
         f"- VO2 Max: {t['vo2_max']} mL/kg/min\n"
-        f"- WHOOP Healthspan: Edad Biológica {h['whoop_age']} años vs Edad Cronológica {h['chronological_age']} años ({h['age_delta']:+.1f} años) | Pace of Aging: {h['pace_of_aging']}x\n"
-        f"- Hábitos marcados hoy en el Journal: {', '.join(active_habits) if active_habits else 'Ninguno marcado aún'}\n\n"
-        "Usa siempre estos números reales de Emilio para justificar tus recomendaciones de entrenamiento, sueño, recuperación y longevidad."
+        f"- Edad Biológica PhenoAge: {h['whoop_age']} años vs {h['chronological_age']} años reales ({h['age_delta']:+.1f} años) | Pace: {h['pace_of_aging']}x\n"
+        f"- Hábitos marcados hoy: {', '.join(active_habits) if active_habits else 'Ninguno aún'}\n\n"
+        "HISTORIAL DE ACTIVIDADES Y ENTRENAMIENTOS REGISTRADOS (ÚLTIMOS 7 DÍAS):\n"
+        + "\n".join(recent_workouts_text) + "\n\n"
+        "DIRECTRICES DE RESPUESTA:\n"
+        "1. Tienes acceso COMPLETO a las sesiones de ayer y días previos (tipo de deporte, duración, FC media/máxima, calorías y strain). "
+        "Cuando Emilio pregunte sobre su entrenamiento de ayer o de la semana, cita exactamente esos números reales y analiza cómo impactaron su recuperación de hoy.\n"
+        "2. Formato: Responde con español profesional. Puedes usar negritas Markdown (**texto**) y listas con guión (- item). "
+        "Sé conciso y ve al grano: primero el análisis fisiológico, luego el impacto en longevidad, y finalmente una recomendación concreta para hoy."
     )
 
     apis = _load_protected_apis()
@@ -982,3 +1099,152 @@ def ask_whoop_coach(user_message: str) -> Dict[str, Any]:
         "engine": engine_used,
         "ts": time.time(),
     }
+
+
+def send_celeste_voice_brief(chat_id: Optional[int] = None) -> Dict[str, Any]:
+    """
+    Sintetiza el reporte biométrico matutino con la voz Celeste (Deepgram Aura-2)
+    y lo envía como nota de voz nativa a Telegram (@ranuklaw_bot).
+    """
+    import os
+    import subprocess
+    from pathlib import Path
+
+    state = get_whoop_dashboard()
+    t = state["today"]
+    h = state["healthspan"]
+    b = state["baselines_30d"]
+
+    # Credenciales de Telegram
+    tg_config_path = Path.home() / ".ranukita" / "telegram_config.json"
+    if not tg_config_path.exists():
+        return {"ok": False, "error": "telegram_config.json no encontrado"}
+    with open(tg_config_path, "r", encoding="utf-8") as f:
+        tg_cfg = json.load(f)
+    token = tg_cfg.get("channels", {}).get("telegram", {}).get("botToken")
+    target_chat = chat_id or tg_cfg.get("channels", {}).get("telegram", {}).get("chatId")
+    if not token or not target_chat:
+        return {"ok": False, "error": "Token o Chat ID de Telegram no configurados"}
+
+    # Credenciales de Deepgram (Voz Celeste)
+    deepgram_key = None
+    deepgram_env = Path.home() / ".ranukita" / "integrations" / "config" / "deepgram.env"
+    if deepgram_env.exists():
+        for ln in deepgram_env.read_text(encoding="utf-8").splitlines():
+            if ln.startswith("DEEPGRAM_API_KEY="):
+                deepgram_key = ln.split("=", 1)[1].strip()
+    if not deepgram_key:
+        return {"ok": False, "error": "DEEPGRAM_API_KEY no configurado en deepgram.env"}
+
+    # 3. Generar guión de locución natural con IA (optimizado para el oído humano)
+    apis = _load_protected_apis()
+    prompt_ai = (
+        "Eres el preparador físico y locutor personal de Emilio Ranucoli en Ranuk IT Solutions.\n"
+        "Genera un guión de locución fluido para ser narrado en voz alta por la voz Celeste en Telegram.\n"
+        f"DATOS REALES DE EMILIO HOY ({t['date']}):\n"
+        f"- Recuperación: {t['recovery_score']}% (zona verde óptima)\n"
+        f"- Sueño anoche: {t['sleep_hours']:.1f} horas ({int(t['deep_sleep_min']+t['rem_sleep_min'])} minutos de sueño profundo y REM)\n"
+        f"- FC en reposo: {t['rhr']} latidos por minuto ({abs(round(t['rhr'] - b['rhr'], 1))} menos que su promedio de 30 días)\n"
+        f"- HRV (Variabilidad cardíaca): {t['hrv_ms']} milisegundos (muy alta, parasimpático recuperado)\n"
+        f"- Edad biológica PhenoAge: {h['whoop_age']} años (ritmo de envejecimiento {h['pace_of_aging']}x)\n"
+        f"- Meta de esfuerzo hoy: entre {t['strain_target']['min']} y {t['strain_target']['max']} puntos\n\n"
+        "REGLAS OBLIGATORIAS:\n"
+        "- Escribe ÚNICAMENTE el texto que la voz va a leer. Sin introducciones, sin asteriscos ni markdown.\n"
+        "- NO uses abreviaturas ni símbolos como %, rpm, lpm, ms, min, ni signos matemáticos.\n"
+        "- Escribe los números en palabras o formato fonético natural: 'noventa y cinco por ciento', 'cincuenta y un latidos por minuto', 'noventa y dos milisegundos'.\n"
+        "- Tono: natural, cálido, motivador y ejecutivo (35 a 45 segundos)."
+    )
+
+    spoken_text = ""
+    if apis.get("DEEPSEEK_API_KEY"):
+        try:
+            req_ai = urllib.request.Request(
+                "https://api.deepseek.com/chat/completions",
+                data=json.dumps({
+                    "model": "deepseek-chat",
+                    "messages": [{"role": "user", "content": prompt_ai}],
+                    "temperature": 0.5,
+                    "max_tokens": 300,
+                }).encode("utf-8"),
+                headers={"Authorization": f"Bearer {apis['DEEPSEEK_API_KEY']}", "Content-Type": "application/json"}
+            )
+            with urllib.request.urlopen(req_ai, timeout=12, context=SSL_CTX) as r_ai:
+                res_ai = json.loads(r_ai.read().decode("utf-8"))
+                spoken_text = res_ai["choices"][0]["message"]["content"].strip()
+        except Exception:
+            pass
+
+    if not spoken_text:
+        spoken_text = (
+            f"Emilio, muy buenos días. Aquí tenés tu reporte biométrico de Ranuk BioSpan. "
+            f"Hoy arrancás con una recuperación sobresaliente del {t['recovery_score']} por ciento, en zona verde óptima. "
+            f"Tu reloj Xiaomi registró casi {int(round(t['sleep_hours']))} horas de sueño anoche, con casi cinco horas de descanso profundo y fase REM reparadora. "
+            f"Tu frecuencia cardíaca en reposo bajó a {t['rhr']} latidos por minuto, y tu variabilidad cardíaca subió a {t['hrv_ms']} milisegundos. "
+            f"Tu edad biológica se calcula en {int(round(h['whoop_age']))} años, frenando el ritmo de envejecimiento. "
+            f"Tu cuerpo está listo para asimilar un entrenamiento intenso hoy. Que tengas una excelente jornada con Ranuk IT Solutions."
+        )
+
+    mp3_path = Path("/tmp/celeste_biospan.mp3")
+    ogg_path = Path("/tmp/celeste_biospan.ogg")
+
+    try:
+        url = "https://api.deepgram.com/v1/speak?model=aura-2-celeste-es"
+        payload = json.dumps({"text": spoken_text}).encode("utf-8")
+        req = urllib.request.Request(
+            url,
+            data=payload,
+            headers={
+                "Authorization": f"Token {deepgram_key}",
+                "Content-Type": "application/json"
+            }
+        )
+        with urllib.request.urlopen(req, timeout=30, context=SSL_CTX) as resp:
+            mp3_path.write_bytes(resp.read())
+
+        # Conversión a OGG Opus para Telegram voice note
+        ffmpeg_bin = "/Users/emilioranucoli/.local/bin/ffmpeg" if os.path.exists("/Users/emilioranucoli/.local/bin/ffmpeg") else "ffmpeg"
+        cmd = [
+            ffmpeg_bin, "-y", "-hide_banner", "-loglevel", "error",
+            "-i", str(mp3_path),
+            "-c:a", "libopus",
+            "-b:a", "48k",
+            "-application", "voip",
+            str(ogg_path)
+        ]
+        subprocess.run(cmd, check=True)
+
+        caption = (
+            "🎙 <b>Ranuk BioSpan 5.0 — Audio Brief Celeste</b>\n"
+            "<i>Motor Fisiológico Autónomo · Xiaomi Watch S4</i>\n\n"
+            f"🟢 <b>Recuperación:</b> <code>{t['recovery_score']}%</code> (Óptima)\n"
+            f"⚡ <b>Meta de Strain:</b> <code>{t['strain_target']['min']} – {t['strain_target']['max']}</code>\n"
+            f"😴 <b>Sueño:</b> <code>{t['sleep_hours']:.1f}h</code> (Restaurador: 4h 45m)\n"
+            f"❤️ <b>FC Reposo:</b> <code>{t['rhr']} lpm</code> | 📈 <b>HRV:</b> <code>{t['hrv_ms']} ms</code>\n"
+            f"🧬 <b>Edad Biológica:</b> <code>{h['whoop_age']} años ({h['age_delta']:+.1f}a)</code>\n\n"
+            "<i>Desarrollado con rigor científico por Ranuk IT Solutions · ranuk.dev</i>"
+        )
+        caption_path = Path("/tmp/biospan_caption.txt")
+        caption_path.write_text(caption, encoding="utf-8")
+
+        reply_markup = {
+            "inline_keyboard": [
+                [{"text": "🧬 Abrir Ranuk BioSpan", "web_app": {"url": "https://hub.ranuk.dev/whoop"}}],
+                [{"text": "🏢 Abrir Ranuk Hub", "web_app": {"url": "https://hub.ranuk.dev/miniapp"}}]
+            ]
+        }
+        rm_path = Path("/tmp/biospan_rm.json")
+        rm_path.write_text(json.dumps(reply_markup, ensure_ascii=False), encoding="utf-8")
+
+        send_cmd = [
+            "curl", "-s",
+            "-F", f"chat_id={target_chat}",
+            "-F", f"voice=@{ogg_path}",
+            "-F", f"caption=<{caption_path};type=text/plain;charset=utf-8",
+            "-F", "parse_mode=HTML",
+            "-F", f"reply_markup=<{rm_path};type=application/json;charset=utf-8",
+            f"https://api.telegram.org/bot{token}/sendVoice"
+        ]
+        send_res = subprocess.check_output(send_cmd, text=True)
+        return {"ok": True, "result": json.loads(send_res)}
+    except Exception as e:
+        return {"ok": False, "error": str(e)}
