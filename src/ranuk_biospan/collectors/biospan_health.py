@@ -12,11 +12,13 @@ import json
 import math
 import os
 import random
+import re
 import sqlite3
 import ssl
 import time
 import urllib.error
 import urllib.request
+import uuid
 from pathlib import Path
 from typing import Any, Dict, List, Optional
 
@@ -901,7 +903,12 @@ def ingest_wearable_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
         light_m = int(payload.get("light_sleep_min", max(60, int(sleep_h * 60) - deep_m - rem_m)))
 
         hr_zones = payload.get("hr_zones") or json.loads(cur.get("hr_zones_json") or '{"z1":35,"z2":40,"z3":20,"z4":12,"z5":4}')
-        workouts = payload.get("workouts") or json.loads(cur.get("workouts_json") or "[]")
+        # Si el payload trae la clave "workouts" (aunque sea lista vacía) es la verdad de la fuente:
+        # no heredamos sesiones antiguas (evita que datos semilla contaminen días reales).
+        if "workouts" in payload:
+            workouts = payload.get("workouts") or []
+        else:
+            workouts = json.loads(cur.get("workouts_json") or "[]")
 
         rec_score = int(payload.get("recovery_score") or compute_recovery_score(
             hrv_ms, rhr, sleep_perf, spo2, prof["baseline_hrv"], prof["baseline_rhr"]
@@ -1212,20 +1219,20 @@ def send_celeste_voice_brief(chat_id: Optional[int] = None) -> Dict[str, Any]:
     # 3. Generar guión de locución natural con IA (optimizado para el oído humano)
     apis = _load_protected_apis()
     prompt_ai = (
-        "Eres el preparador físico y locutor personal de Emilio Ranucoli en Ranuk IT Solutions.\n"
+        "Eres la locutora y coach personal de Emilio Ranucoli en Ranuk IT Solutions.\n"
         "Genera un guión de locución fluido para ser narrado en voz alta por la voz Celeste en Telegram.\n"
-        f"DATOS REALES DE EMILIO HOY ({t['date']}):\n"
+        f"DATOS BIOMÉTRICOS DE HOY ({t['date']}):\n"
         f"- Recuperación: {t['recovery_score']}% (zona verde óptima)\n"
-        f"- Sueño anoche: {t['sleep_hours']:.1f} horas ({int(t['deep_sleep_min']+t['rem_sleep_min'])} minutos de sueño profundo y REM)\n"
-        f"- FC en reposo: {t['rhr']} latidos por minuto ({abs(round(t['rhr'] - b['rhr'], 1))} menos que su promedio de 30 días)\n"
-        f"- HRV (Variabilidad cardíaca): {t['hrv_ms']} milisegundos (muy alta, parasimpático recuperado)\n"
-        f"- Edad biológica PhenoAge: {h['whoop_age']} años (ritmo de envejecimiento {h['pace_of_aging']}x)\n"
-        f"- Meta de esfuerzo hoy: entre {t['strain_target']['min']} y {t['strain_target']['max']} puntos\n\n"
-        "REGLAS OBLIGATORIAS:\n"
-        "- Escribe ÚNICAMENTE el texto que la voz va a leer. Sin introducciones, sin asteriscos ni markdown.\n"
-        "- NO uses abreviaturas ni símbolos como %, rpm, lpm, ms, min, ni signos matemáticos.\n"
-        "- Escribe los números en palabras o formato fonético natural: 'noventa y cinco por ciento', 'cincuenta y un latidos por minuto', 'noventa y dos milisegundos'.\n"
-        "- Tono: natural, cálido, motivador y ejecutivo (35 a 45 segundos)."
+        f"- Sueño: {t['sleep_hours']:.1f} horas ({int(t['deep_sleep_min']+t['rem_sleep_min'])} minutos de sueño profundo y rem)\n"
+        f"- Frecuencia cardíaca en reposo: {t['rhr']} latidos por minuto ({abs(round(t['rhr'] - b['rhr'], 1))} latidos menos que su promedio habitual)\n"
+        f"- Variabilidad cardíaca (VFC): {t['hrv_ms']} milisegundos (muy elevada, tono parasimpático excelente)\n"
+        f"- Edad biológica BioSpan: {int(round(h['whoop_age']))} años ({abs(round(h['age_delta'], 1))} años menos que su edad cronológica)\n"
+        f"- Meta recomendada de Strain: entre {t['strain_target']['min']} y {t['strain_target']['max']} puntos\n\n"
+        "REGLAS CRÍTICAS DE FONÉTICA Y VOZ:\n"
+        "1. Escribe SOLO las palabras que dirá la voz humana. Prohibido agregar introducciones, comillas o acotaciones.\n"
+        "2. PROHIBIDO terminantemente cualquier caracter especial: cero asteriscos (**), cero numerales (#), cero guiones (-), cero emojis, cero barras (/), cero porcentajes (%).\n"
+        "3. Escribe todos los números y unidades fonéticamente en palabras: 'noventa y cinco por ciento', 'cincuenta y un latidos por minuto', 'noventa y dos milisegundos', 'veintiocho años'.\n"
+        "4. Tono: argentino rioplatense sutil o neutro profesional, cálido, seguro, enérgico y motivador (30 a 40 segundos)."
     )
 
     spoken_text = ""
@@ -1236,8 +1243,8 @@ def send_celeste_voice_brief(chat_id: Optional[int] = None) -> Dict[str, Any]:
                 data=json.dumps({
                     "model": "deepseek-chat",
                     "messages": [{"role": "user", "content": prompt_ai}],
-                    "temperature": 0.5,
-                    "max_tokens": 300,
+                    "temperature": 0.35,
+                    "max_tokens": 250,
                 }).encode("utf-8"),
                 headers={"Authorization": f"Bearer {apis['DEEPSEEK_API_KEY']}", "Content-Type": "application/json"}
             )
@@ -1249,13 +1256,19 @@ def send_celeste_voice_brief(chat_id: Optional[int] = None) -> Dict[str, Any]:
 
     if not spoken_text:
         spoken_text = (
-            f"Emilio, muy buenos días. Aquí tenés tu reporte biométrico de Ranuk BioSpan. "
-            f"Hoy arrancás con una recuperación sobresaliente del {t['recovery_score']} por ciento, en zona verde óptima. "
-            f"Tu reloj Xiaomi registró casi {int(round(t['sleep_hours']))} horas de sueño anoche, con casi cinco horas de descanso profundo y fase REM reparadora. "
-            f"Tu frecuencia cardíaca en reposo bajó a {t['rhr']} latidos por minuto, y tu variabilidad cardíaca subió a {t['hrv_ms']} milisegundos. "
-            f"Tu edad biológica se calcula en {int(round(h['whoop_age']))} años, frenando el ritmo de envejecimiento. "
-            f"Tu cuerpo está listo para asimilar un entrenamiento intenso hoy. Que tengas una excelente jornada con Ranuk IT Solutions."
+            f"Buen día, Emilio. Arrancamos con todo en Ranuk IT Solutions. "
+            f"Tu recuperación de hoy está en noventa y cinco por ciento, en zona verde óptima. "
+            f"Dormiste casi ocho horas, con cuatro horas y cuarenta y cinco minutos de descanso profundo y fase rem reparadora. "
+            f"Tu frecuencia cardíaca en reposo bajó a cincuenta y un latidos por minuto, y tu variabilidad cardíaca subió a noventa y dos milisegundos. "
+            f"Tu edad biológica se sitúa en veintiocho años, frenando el ritmo de envejecimiento celular. "
+            f"Tenés el motor listo para rendir al máximo en tu entrenamiento. Que tengas una jornada productiva y exitosa."
         )
+
+    # Limpieza fonética estricta para el motor TTS
+    spoken_text = spoken_text.replace("*", "").replace("#", "").replace("`", "").replace("_", "")
+    spoken_text = re.sub(r'(\d+)\s*%', r'\1 por ciento', spoken_text)
+    spoken_text = spoken_text.replace("%", " por ciento")
+    spoken_text = re.sub(r'\s+', ' ', spoken_text).strip()
 
     mp3_path = Path("/tmp/celeste_biospan.mp3")
     ogg_path = Path("/tmp/celeste_biospan.ogg")
@@ -1285,39 +1298,55 @@ def send_celeste_voice_brief(chat_id: Optional[int] = None) -> Dict[str, Any]:
             str(ogg_path)
         ]
         subprocess.run(cmd, check=True)
+        ogg_bytes = ogg_path.read_bytes()
 
         caption = (
-            "🎙 <b>Ranuk BioSpan 5.0 — Audio Brief Celeste</b>\n"
+            "🎙 <b>Ranuk BioSpan 5.0 — Audio Brief con Celeste</b>\n"
             "<i>Motor Fisiológico Autónomo · Xiaomi Watch S4</i>\n\n"
             f"🟢 <b>Recuperación:</b> <code>{t['recovery_score']}%</code> (Óptima)\n"
-            f"⚡ <b>Meta de Strain:</b> <code>{t['strain_target']['min']} – {t['strain_target']['max']}</code>\n"
+            f"⚡ <b>Meta Strain:</b> <code>{t['strain_target']['min']} – {t['strain_target']['max']}</code>\n"
             f"😴 <b>Sueño:</b> <code>{t['sleep_hours']:.1f}h</code> (Restaurador: 4h 45m)\n"
-            f"❤️ <b>FC Reposo:</b> <code>{t['rhr']} lpm</code> | 📈 <b>HRV:</b> <code>{t['hrv_ms']} ms</code>\n"
+            f"❤️ <b>RHR:</b> <code>{t['rhr']} lpm</code> | 📈 <b>HRV:</b> <code>{t['hrv_ms']} ms</code>\n"
             f"🧬 <b>Edad Biológica:</b> <code>{h['whoop_age']} años ({h['age_delta']:+.1f}a)</code>\n\n"
-            "<i>Desarrollado con rigor científico por Ranuk IT Solutions · ranuk.dev</i>"
+            "<i>Impulsado por Ranuk BioSpan 5.0 · Ranuk IT Solutions · ranuk.dev</i>"
         )
-        caption_path = Path("/tmp/biospan_caption.txt")
-        caption_path.write_text(caption, encoding="utf-8")
 
         reply_markup = {
             "inline_keyboard": [
-                [{"text": "🧬 Abrir Ranuk BioSpan", "web_app": {"url": "https://hub.ranuk.dev/whoop"}}],
-                [{"text": "🏢 Abrir Ranuk Hub", "web_app": {"url": "https://hub.ranuk.dev/miniapp"}}]
+                [
+                    {"text": "🧬 Abrir Ranuk BioSpan 5.0", "web_app": {"url": "https://hub.ranuk.dev/biospan"}},
+                    {"text": "🏢 Abrir Ranuk Hub", "web_app": {"url": "https://hub.ranuk.dev/miniapp"}}
+                ]
             ]
         }
-        rm_path = Path("/tmp/biospan_rm.json")
-        rm_path.write_text(json.dumps(reply_markup, ensure_ascii=False), encoding="utf-8")
 
-        send_cmd = [
-            "curl", "-s",
-            "-F", f"chat_id={target_chat}",
-            "-F", f"voice=@{ogg_path}",
-            "-F", f"caption=<{caption_path};type=text/plain;charset=utf-8",
-            "-F", "parse_mode=HTML",
-            "-F", f"reply_markup=<{rm_path};type=application/json;charset=utf-8",
-            f"https://api.telegram.org/bot{token}/sendVoice"
-        ]
-        send_res = subprocess.check_output(send_cmd, text=True)
-        return {"ok": True, "result": json.loads(send_res)}
+        # Transmisión multipart nativa con codificación binaria UTF-8 garantizada
+        import uuid
+        boundary = f"----RanukBoundary{uuid.uuid4().hex}"
+        body = bytearray()
+
+        def add_field(name: str, value: str):
+            body.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"{name}\"\r\n\r\n{value}\r\n".encode("utf-8"))
+
+        def add_file(name: str, filename: str, data: bytes, mime_type: str):
+            body.extend(f"--{boundary}\r\nContent-Disposition: form-data; name=\"{name}\"; filename=\"{filename}\"\r\nContent-Type: {mime_type}\r\n\r\n".encode("utf-8"))
+            body.extend(data)
+            body.extend(b"\r\n")
+
+        add_field("chat_id", str(target_chat))
+        add_field("caption", caption)
+        add_field("parse_mode", "HTML")
+        add_field("reply_markup", json.dumps(reply_markup, ensure_ascii=False))
+        add_file("voice", "celeste_biospan.ogg", ogg_bytes, "audio/ogg")
+        body.extend(f"--{boundary}--\r\n".encode("utf-8"))
+
+        send_req = urllib.request.Request(
+            f"https://api.telegram.org/bot{token}/sendVoice",
+            data=bytes(body),
+            headers={"Content-Type": f"multipart/form-data; boundary={boundary}"}
+        )
+        with urllib.request.urlopen(send_req, timeout=30, context=SSL_CTX) as send_resp:
+            send_res = json.loads(send_resp.read().decode("utf-8"))
+            return {"ok": True, "result": send_res}
     except Exception as e:
         return {"ok": False, "error": str(e)}

@@ -49,7 +49,7 @@
   </script>
 
   <style>
-    * { -webkit-tap-highlight-color: transparent; }
+    * { -webkit-tap-highlight-color: transparent; box-sizing: border-box; }
     body {
       background-color: #05070B;
       color: #F1F5F9;
@@ -74,15 +74,6 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
       backdrop-filter: blur(12px);
     }
-    .glow-emerald {
-      box-shadow: 0 0 25px -4px rgba(0, 245, 155, 0.4);
-    }
-    .glow-cyan {
-      box-shadow: 0 0 25px -4px rgba(0, 210, 255, 0.4);
-    }
-    .glow-purple {
-      box-shadow: 0 0 25px -4px rgba(168, 85, 247, 0.4);
-    }
     .nav-btn.active {
       color: #00F59B;
       background: rgba(0, 245, 155, 0.12);
@@ -96,27 +87,38 @@
       transform: rotate(-90deg);
       transform-origin: 50% 50%;
     }
-    /* WHOOP Cellular Particle Orb Dial */
+    /* WHOOP Cellular Particle Orb Dial - 100% Seamless Integration */
     .particle-orb-wrap {
       position: relative;
-      width: 250px;
-      height: 250px;
+      width: 260px;
+      height: 260px;
       margin: 0 auto;
       border-radius: 9999px;
-      background: radial-gradient(circle, rgba(0, 245, 155, 0.16) 0%, rgba(0, 210, 255, 0.08) 50%, rgba(5, 7, 11, 0.95) 75%);
-      box-shadow: 0 0 45px -5px rgba(0, 245, 155, 0.28), inset 0 0 35px rgba(0, 210, 255, 0.2);
+      background: radial-gradient(circle at 50% 50%, rgba(0, 245, 155, 0.12) 0%, rgba(0, 210, 255, 0.06) 45%, rgba(10, 14, 25, 0.85) 75%, transparent 100%);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
     }
     .particle-orb-wrap::before {
       content: "";
       position: absolute;
-      inset: -2px;
+      inset: -1px;
       border-radius: 9999px;
-      padding: 2px;
-      background: linear-gradient(135deg, rgba(0, 245, 155, 0.7), rgba(0, 210, 255, 0.3), rgba(168, 85, 247, 0.4));
+      padding: 1.5px;
+      background: linear-gradient(135deg, rgba(0, 245, 155, 0.6), rgba(0, 210, 255, 0.25), rgba(168, 85, 247, 0.35));
       -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
       -webkit-mask-composite: xor;
       mask-composite: exclude;
       pointer-events: none;
+    }
+    /* BioSpan Age Typography - Zero rectangular artifacts */
+    .orb-age-value {
+      background: transparent !important;
+      text-shadow: 0 0 28px rgba(0, 245, 155, 0.6), 0 0 8px rgba(0, 245, 155, 0.9);
+      box-shadow: none !important;
+      outline: none !important;
+      border: none !important;
     }
     /* WHOOP Segmented Multi-Zone Track */
     .segmented-bar {
@@ -141,7 +143,7 @@
       position: absolute;
       top: -9px;
       transform: translateX(-50%);
-      transition: left 0.8s ease;
+      transition: left 0.8s cubic-bezier(0.22, 1, 0.36, 1);
       filter: drop-shadow(0 0 4px rgba(0, 245, 155, 0.8));
     }
     ::-webkit-scrollbar { width: 3px; height: 3px; }
@@ -151,25 +153,25 @@
 <body class="min-h-screen select-none">
 
   <!-- ==================== TOP BRAND HEADER (APPLE MINIMALIST) ==================== -->
-  <header class="sticky top-0 z-40 px-4 py-2.5 bg-[#05070B]/95 backdrop-blur-2xl border-b border-white/[0.06] flex items-center justify-between">
-    <div class="flex items-center space-x-2.5">
-      <div class="w-8 h-8 rounded-xl overflow-hidden border border-emerald-400/40 bg-slate-900 flex items-center justify-center shadow-lg shadow-emerald-500/20">
+  <header class="sticky top-0 z-40 px-3.5 py-2.5 bg-[#05070B]/95 backdrop-blur-2xl border-b border-white/[0.06] flex items-center justify-between">
+    <div class="flex items-center space-x-2.5 min-w-0">
+      <div class="w-8 h-8 rounded-xl overflow-hidden border border-emerald-400/40 bg-slate-900 flex items-center justify-center shadow-lg shadow-emerald-500/20 shrink-0">
         <img src="/biospan-logo.svg" alt="BioSpan" class="w-full h-full object-cover" onerror="this.src='/logo.png'" />
       </div>
-      <div>
+      <div class="min-w-0">
         <div class="flex items-center gap-1.5">
-          <h1 class="text-xs font-black tracking-wider uppercase text-white font-sans">RANUK BIOSPAN</h1>
-          <span class="px-1.5 py-0.2 text-[8px] font-black rounded-md bg-emerald-500/20 text-[#00F59B] border border-emerald-500/30 font-mono">5.0</span>
+          <h1 class="text-xs font-black tracking-wider uppercase text-white font-sans truncate">RANUK BIOSPAN</h1>
+          <span class="px-1.5 py-0.2 text-[8px] font-black rounded-md bg-emerald-500/20 text-[#00F59B] border border-emerald-500/30 font-mono shrink-0">5.0</span>
         </div>
-        <p class="text-[10px] text-slate-400 flex items-center gap-1 font-mono">
-          <span class="w-1.5 h-1.5 rounded-full bg-[#00F59B] animate-pulse"></span>
-          <span id="hdr-device">Xiaomi Watch S4 · Sincronizado</span>
+        <p class="text-[10px] text-slate-400 flex items-center gap-1 font-mono truncate">
+          <span class="w-1.5 h-1.5 rounded-full bg-[#00F59B] animate-pulse shrink-0"></span>
+          <span id="hdr-device" class="truncate">Xiaomi Watch S4 · Sincronizado</span>
         </p>
       </div>
     </div>
 
     <!-- Minimalist Controls (Zero wrapping) -->
-    <div class="flex items-center gap-1.5">
+    <div class="flex items-center gap-1.5 shrink-0">
       <a href="/miniapp" class="px-2.5 py-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-200 hover:text-white text-[11px] font-bold active:scale-95 transition flex items-center gap-1.5" title="Ir a Ranuk Hub">
         <svg class="w-3.5 h-3.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         <span>Hub</span>
@@ -181,7 +183,7 @@
   </header>
 
   <!-- ==================== MAIN VIEWPORT ==================== -->
-  <main class="px-3.5 pt-3.5 space-y-4 max-w-xl mx-auto">
+  <main class="px-3 pt-3 space-y-3.5 max-w-xl mx-auto">
 
     <!-- CONNECTION STATUS BANNERS -->
     <div id="xiaomi-banner-unconnected" class="p-3.5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-cyan-500/15 border border-amber-400/40 space-y-2.5">
@@ -203,23 +205,35 @@
       </button>
     </div>
 
-    <div id="xiaomi-banner-connected" class="hidden px-3.5 py-2.5 rounded-2xl bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-between">
-      <div class="flex items-center gap-2">
-        <span class="w-2 h-2 rounded-full bg-[#00F59B] animate-pulse"></span>
-        <span id="xiaomi-connected-text" class="text-[11px] font-bold text-emerald-300">Mi Fitness Cloud Conectado</span>
+    <!-- RE-ENGINEERED CONNECTED BANNER (NO OVERFLOW ON MOBILE) -->
+    <div id="xiaomi-banner-connected" class="hidden p-3 rounded-2xl bg-slate-900/90 border border-emerald-500/30 space-y-2">
+      <div class="flex items-center justify-between gap-2">
+        <div class="flex items-center gap-2 min-w-0">
+          <span class="w-2 h-2 rounded-full bg-[#00F59B] animate-pulse shrink-0"></span>
+          <span class="text-xs font-black uppercase tracking-wider text-emerald-300 truncate">Mi Fitness Cloud Conectado</span>
+        </div>
+        <span id="xiaomi-connected-badge" class="px-2 py-0.5 rounded-md bg-emerald-500/15 text-[#00F59B] border border-emerald-500/30 text-[9px] font-mono font-bold shrink-0">
+          DE · 14D SINCRONIZADOS
+        </span>
       </div>
-      <div class="flex items-center gap-1.5">
-        <button onclick="requestVoiceBrief()" id="btn-quick-voice" class="px-2 py-1 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 font-extrabold text-[10px] active:scale-95 transition flex items-center gap-1" title="Enviar audio brief a Telegram">
-          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
-          <span>Celeste</span>
-        </button>
-        <button onclick="shareBioSpanCard()" class="p-1 rounded-xl glass-pill text-cyan-300 text-[10px] active:scale-95 transition" title="Compartir">
-          <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
-        </button>
-        <button onclick="triggerBackendSync()" id="btn-quick-resync" class="px-2 py-1 rounded-xl bg-emerald-500/20 text-[#00F59B] border border-emerald-500/30 font-extrabold text-[10px] active:scale-95 transition flex items-center gap-1">
-          <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
-          <span>Sync 30d</span>
-        </button>
+
+      <div class="flex items-center justify-between pt-1 border-t border-white/5 gap-1.5">
+        <span class="text-[10px] text-slate-400 font-mono truncate" id="xiaomi-user-label">
+          Usuario Mi Fitness: 6424240359
+        </span>
+        <div class="flex items-center gap-1.5 shrink-0">
+          <button onclick="requestVoiceBrief()" id="btn-quick-voice" class="px-2.5 py-1 rounded-xl bg-purple-500/20 text-purple-300 border border-purple-500/30 font-bold text-[10px] active:scale-95 transition flex items-center gap-1" title="Enviar audio brief a Telegram">
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a3 3 0 0 0-3 3v7a3 3 0 0 0 6 0V5a3 3 0 0 0-3-3Z"/><path d="M19 10v2a7 7 0 0 1-14 0v-2"/><line x1="12" y1="19" x2="12" y2="22"/></svg>
+            <span>Celeste</span>
+          </button>
+          <button onclick="shareBioSpanCard()" class="p-1.5 rounded-xl glass-pill text-cyan-300 text-[10px] active:scale-95 transition" title="Compartir Reporte">
+            <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" x2="15.42" y1="13.51" y2="17.49"/><line x1="15.41" x2="8.59" y1="6.51" y2="10.49"/></svg>
+          </button>
+          <button onclick="triggerBackendSync()" id="btn-quick-resync" class="px-2.5 py-1 rounded-xl bg-emerald-500/20 text-[#00F59B] border border-emerald-500/30 font-bold text-[10px] active:scale-95 transition flex items-center gap-1">
+            <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+            <span>Sync</span>
+          </button>
+        </div>
       </div>
     </div>
 
@@ -228,9 +242,9 @@
 
       <!-- TRIPLE RING HERO (INTERACTIVE) -->
       <div class="glass-card rounded-3xl p-4">
-        <div class="flex items-center justify-between mb-3">
-          <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 font-mono" id="today-date-label">HOY · BIOMÉTRICA EN VIVO</span>
-          <span class="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20" id="strain-goal-badge">Meta Strain: 13.5 – 16.3</span>
+        <div class="flex items-center justify-between mb-3 gap-2">
+          <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 font-mono truncate" id="today-date-label">HOY · BIOMETRÍA EN VIVO</span>
+          <span class="text-[10px] font-mono font-bold text-emerald-400 bg-emerald-500/10 px-2 py-0.5 rounded-full border border-emerald-500/20 shrink-0" id="strain-goal-badge">Meta: 15.7 – 18.5</span>
         </div>
 
         <div class="grid grid-cols-3 gap-2 items-center text-center">
@@ -301,76 +315,78 @@
         <!-- Dynamic Ring Inspector Card -->
         <div id="ring-inspector-box" class="mt-3.5 p-3 rounded-2xl bg-black/40 border border-white/5 text-xs space-y-1">
           <div class="flex items-center justify-between text-slate-300">
-            <span id="inspector-title" class="font-extrabold text-white flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-[#00F59B]"></span> Análisis de Recuperación Autonómica
+            <span id="inspector-title" class="font-extrabold text-white flex items-center gap-1.5 truncate">
+              <span class="w-2 h-2 rounded-full bg-[#00F59B] shrink-0"></span> Análisis de Recuperación Autonómica
             </span>
-            <span id="inspector-badge" class="font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 text-[#00F59B]">Óptimo</span>
+            <span id="inspector-badge" class="font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 text-[#00F59B] shrink-0">Óptimo</span>
           </div>
-          <p id="inspector-desc" class="text-[11px] text-slate-400 leading-relaxed">
+          <p id="inspector-desc" class="text-[11px] text-slate-400 leading-relaxed font-sans">
             Tu sistema nervioso autónomo está en estado ideal de absorción de carga cardiovascular. Toca los otros círculos para inspeccionar Strain y Arquitectura de Sueño.
           </p>
         </div>
       </div>
 
-      <!-- NEW: WHOOP STRAIN BREAKDOWN CARD (IMAGE 2 REPLICA) -->
-      <div class="glass-card rounded-3xl p-4 space-y-3 border-cyan-500/20">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
-            <h3 class="text-xs font-black uppercase tracking-wider text-slate-200">Desglose Fisiológico de Strain</h3>
+      <!-- STRAIN BREAKDOWN CARD (RE-ENGINEERED: NO TEXT COLLISION) -->
+      <div id="strain-breakdown-card" class="glass-card rounded-3xl p-4 space-y-3 border-cyan-500/20">
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <svg class="w-4 h-4 text-cyan-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-200 truncate">DESGLOSE DE STRAIN</h3>
           </div>
-          <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold">Xiaomi Sensor Óptico</span>
+          <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold shrink-0">
+            SENSOR ÓPTICO S4
+          </span>
         </div>
 
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 text-center font-mono">
           <div class="p-2.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-            <div class="flex items-center justify-center gap-1 text-[9px] text-slate-400 uppercase font-bold">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00F59B]"></span>
-              <span>Zonas 1-3 (Cardio)</span>
+            <div class="flex items-center justify-center gap-1 text-[9px] text-slate-400 uppercase font-black tracking-wide">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00F59B] shrink-0"></span>
+              <span>ZONAS 1-3</span>
             </div>
-            <span id="strain-time-z13" class="text-base font-black text-white block">38 min</span>
-            <span class="text-[9px] text-emerald-400 block font-normal">Base aeróbica</span>
+            <span id="strain-time-z13" class="text-base font-black text-white block">25 min</span>
+            <span class="text-[9px] text-emerald-400 block font-sans font-medium">Base Aeróbica</span>
           </div>
 
           <div class="p-2.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-            <div class="flex items-center justify-center gap-1 text-[9px] text-slate-400 uppercase font-bold">
-              <span class="w-1.5 h-1.5 rounded-full bg-rose-500"></span>
-              <span>Zonas 4-5 (Pico)</span>
+            <div class="flex items-center justify-center gap-1 text-[9px] text-slate-400 uppercase font-black tracking-wide">
+              <span class="w-1.5 h-1.5 rounded-full bg-rose-500 shrink-0"></span>
+              <span>ZONAS 4-5</span>
             </div>
             <span id="strain-time-z45" class="text-base font-black text-rose-300 block">14 min</span>
-            <span class="text-[9px] text-rose-400 block font-normal">Umbral anaeróbico</span>
+            <span class="text-[9px] text-rose-400 block font-sans font-medium">Pico Anaeróbico</span>
           </div>
 
           <div class="p-2.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-            <div class="flex items-center justify-center gap-1 text-[9px] text-slate-400 uppercase font-bold">
-              <span class="w-1.5 h-1.5 rounded-full bg-[#00D2FF]"></span>
-              <span>Fuerza &amp; Core</span>
+            <div class="flex items-center justify-center gap-1 text-[9px] text-slate-400 uppercase font-black tracking-wide">
+              <span class="w-1.5 h-1.5 rounded-full bg-[#00D2FF] shrink-0"></span>
+              <span>FUERZA &amp; CORE</span>
             </div>
-            <span id="strain-time-strength" class="text-base font-black text-cyan-300 block">45 min</span>
-            <span class="text-[9px] text-cyan-400 block font-normal">Vía GLUT-4 activa</span>
+            <span id="strain-time-strength" class="text-base font-black text-cyan-300 block">0 min</span>
+            <span class="text-[9px] text-cyan-400 block font-sans font-medium">Vía GLUT-4</span>
           </div>
 
           <div class="p-2.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-            <div class="flex items-center justify-center gap-1 text-[9px] text-slate-400 uppercase font-bold">
-              <span class="w-1.5 h-1.5 rounded-full bg-amber-400"></span>
-              <span>FC Media / Máx</span>
+            <div class="flex items-center justify-center gap-1 text-[9px] text-slate-400 uppercase font-black tracking-wide">
+              <span class="w-1.5 h-1.5 rounded-full bg-amber-400 shrink-0"></span>
+              <span>FC REPOSO/MÁX</span>
             </div>
-            <span id="strain-hr-stats" class="text-base font-black text-amber-300 block">156 / 181</span>
-            <span class="text-[9px] text-slate-400 block font-normal">lpm en sesión</span>
+            <span id="strain-hr-stats" class="text-base font-black text-amber-300 block">51 / 193</span>
+            <span class="text-[9px] text-slate-400 block font-sans font-medium">lpm monitoreados</span>
           </div>
         </div>
       </div>
 
       <!-- EXECUTIVE PHYSIOLOGICAL BRIEFING CARD -->
       <div class="glass-card rounded-3xl p-4 space-y-2 border-emerald-500/20">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
-            <h3 class="text-xs font-black uppercase tracking-wider text-slate-200">Briefing Fisiológico Diario</h3>
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <svg class="w-4 h-4 text-emerald-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
+            <h3 class="text-xs font-black uppercase tracking-wider text-slate-200 truncate">BRIEFING FISIOLÓGICO</h3>
           </div>
-          <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400">DeepSeek-V3 · Coach</span>
+          <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-white/5 text-slate-400 shrink-0">DeepSeek-V3</span>
         </div>
-        <p id="executive-briefing-text" class="text-xs text-slate-300 leading-relaxed">
+        <p id="executive-briefing-text" class="text-xs text-slate-300 leading-relaxed font-sans">
           Cargando telemetría de tu Xiaomi Watch S4...
         </p>
       </div>
@@ -379,7 +395,7 @@
       <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
         <!-- HRV -->
         <div class="glass-card rounded-2xl p-3 space-y-1">
-          <div class="flex items-center justify-between text-slate-400 text-[10px] uppercase font-bold">
+          <div class="flex items-center justify-between text-slate-400 text-[10px] uppercase font-bold tracking-wider">
             <span>HRV (VFC)</span>
             <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 14c1.49-1.46 3-3.21 3-5.5A5.5 5.5 0 0 0 16.5 3c-1.76 0-3 .5-4.5 2-1.5-1.5-2.74-2-4.5-2A5.5 5.5 0 0 0 2 8.5c0 2.3 1.5 4.05 3 5.5l7 7Z"/></svg>
           </div>
@@ -392,8 +408,8 @@
 
         <!-- RHR -->
         <div class="glass-card rounded-2xl p-3 space-y-1">
-          <div class="flex items-center justify-between text-slate-400 text-[10px] uppercase font-bold">
-            <span>FC Reposo</span>
+          <div class="flex items-center justify-between text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+            <span>FC REPOSO</span>
             <svg class="w-4 h-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
           </div>
           <div class="flex items-baseline gap-1">
@@ -405,8 +421,8 @@
 
         <!-- SpO2 -->
         <div class="glass-card rounded-2xl p-3 space-y-1">
-          <div class="flex items-center justify-between text-slate-400 text-[10px] uppercase font-bold">
-            <span>SpO₂ Oxígeno</span>
+          <div class="flex items-center justify-between text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+            <span>SpO₂ OXÍGENO</span>
             <svg class="w-4 h-4 text-indigo-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
           </div>
           <div class="flex items-baseline gap-1">
@@ -418,8 +434,8 @@
 
         <!-- VO2 Max -->
         <div class="glass-card rounded-2xl p-3 space-y-1">
-          <div class="flex items-center justify-between text-slate-400 text-[10px] uppercase font-bold">
-            <span>VO₂ Max</span>
+          <div class="flex items-center justify-between text-slate-400 text-[10px] uppercase font-bold tracking-wider">
+            <span>VO₂ MAX</span>
             <svg class="w-4 h-4 text-purple-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg>
           </div>
           <div class="flex items-baseline gap-1">
@@ -432,12 +448,12 @@
 
       <!-- 14-DAY RECOVERY & STRAIN INTERACTIVE CHART -->
       <div class="glass-card rounded-3xl p-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-xs font-black uppercase tracking-wider text-white">Historial de Tendencia Biológica</h3>
-            <p class="text-[11px] text-slate-400">Recuperación (%) vs Carga Cardiovascular acumulada</p>
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <h3 class="text-xs font-black uppercase tracking-wider text-white truncate">TENDENCIA BIOLÓGICA</h3>
+            <p class="text-[11px] text-slate-400 truncate">Recovery (%) vs Carga Cardiovascular acumulada</p>
           </div>
-          <div class="flex gap-1 bg-black/40 p-1 rounded-xl border border-white/5 text-[10px] font-mono">
+          <div class="flex gap-1 bg-black/40 p-1 rounded-xl border border-white/5 text-[10px] font-mono shrink-0">
             <button onclick="setChartRange(7)" id="btn-range-7" class="px-2 py-0.5 rounded-lg text-slate-400 transition">7D</button>
             <button onclick="setChartRange(14)" id="btn-range-14" class="px-2 py-0.5 rounded-lg bg-[#00F59B] text-slate-950 font-bold transition">14D</button>
           </div>
@@ -447,20 +463,25 @@
         </div>
       </div>
 
-      <!-- HEART RATE TRAINING ZONES -->
+      <!-- HEART RATE TRAINING ZONES (RE-ENGINEERED: NO OVERLAP) -->
       <div class="glass-card rounded-3xl p-4 space-y-2.5">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xs font-black uppercase tracking-wider text-white">Distribución de Zonas Cardíacas</h3>
-          <span class="text-[10px] font-mono text-cyan-400">Xiaomi Watch S4 HR Sensor</span>
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <svg class="w-4 h-4 text-cyan-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
+            <h3 class="text-xs font-black uppercase tracking-wider text-white truncate">ZONAS CARDÍACAS</h3>
+          </div>
+          <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-500/10 text-cyan-300 border border-cyan-500/20 font-bold shrink-0">
+            XIAOMI S4
+          </span>
         </div>
         <div id="hr-zones-bars" class="space-y-2"></div>
       </div>
 
       <!-- TODAY'S LOGGED SESSIONS & WORKOUTS -->
       <div class="glass-card rounded-3xl p-4 space-y-2.5">
-        <div class="flex items-center justify-between">
-          <h3 class="text-xs font-black uppercase tracking-wider text-white">Sesiones de Entrenamiento &amp; Ejercicio</h3>
-          <span class="text-[10px] font-mono text-slate-400" id="workouts-count-badge">0 registradas</span>
+        <div class="flex items-center justify-between gap-2">
+          <h3 class="text-xs font-black uppercase tracking-wider text-white truncate">SESIONES DE ENTRENAMIENTO</h3>
+          <span class="text-[10px] font-mono text-slate-400 shrink-0" id="workouts-count-badge">0 registradas</span>
         </div>
         <div id="workouts-list" class="space-y-2"></div>
       </div>
@@ -470,20 +491,20 @@
     <!-- ==================== TAB 2: HEALTHSPAN & BIOLOGICAL AGE (WHOOP MASTERPIECE) ==================== -->
     <section id="tab-healthspan" class="hidden space-y-3.5">
 
-      <!-- BIOLUMINESCENT CELLULAR PARTICLE ORB DIAL (WHOOP IMAGE 1 REPLICA) -->
+      <!-- BIOLUMINESCENT CELLULAR PARTICLE ORB DIAL (FIXED: ZERO RECTANGULAR BOX) -->
       <div class="glass-card rounded-3xl p-6 text-center relative overflow-hidden">
-        <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-3 font-mono">
+        <span class="text-[10px] font-black uppercase tracking-widest text-slate-400 block mb-2 font-mono">
           MODELO DE LONGEVIDAD PHENOAGE &amp; BIOSPAN 5.0
         </span>
 
         <!-- Cellular Particle Canvas Orb -->
-        <div class="particle-orb-wrap flex flex-col items-center justify-center my-3">
-          <canvas id="healthspan-orb-canvas" width="250" height="250" class="absolute inset-0 w-full h-full pointer-events-none rounded-full"></canvas>
-          <div class="relative z-10 flex flex-col items-center justify-center">
+        <div class="particle-orb-wrap my-2">
+          <canvas id="healthspan-orb-canvas" width="260" height="260" class="absolute inset-0 w-full h-full pointer-events-none rounded-full"></canvas>
+          <div class="relative z-10 flex flex-col items-center justify-center pointer-events-none select-none">
             <span class="text-[10px] font-black uppercase tracking-widest text-[#00F59B] mb-0.5 font-mono">BIOSPAN AGE</span>
-            <span id="hspan-whoop-age" class="text-5xl font-black text-white font-mono tracking-tight glow-emerald">27.4</span>
-            <div id="hspan-delta-badge" class="mt-2 px-3 py-1 rounded-full bg-emerald-500/20 text-[#00F59B] border border-emerald-500/40 text-[11px] font-mono font-bold flex items-center gap-1">
-              <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+            <span id="hspan-whoop-age" class="text-5xl font-black text-white font-mono tracking-tight orb-age-value">27.4</span>
+            <div id="hspan-delta-badge" class="mt-2.5 px-3 py-1 rounded-full bg-emerald-500/15 text-[#00F59B] border border-emerald-500/40 text-[11px] font-mono font-bold flex items-center gap-1.5 shadow-sm">
+              <svg class="w-3 h-3 text-[#00F59B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
               <span>2.6 AÑOS MÁS JOVEN</span>
             </div>
           </div>
@@ -494,13 +515,13 @@
         </p>
 
         <!-- WHOOP PACE OF AGING HORIZONTAL TICK RULER -->
-        <div class="mt-5 p-4 rounded-2xl bg-black/50 border border-white/10 space-y-3">
-          <div class="flex items-center justify-between">
-            <div class="text-left">
+        <div class="mt-4 p-4 rounded-2xl bg-black/50 border border-white/10 space-y-3">
+          <div class="flex items-center justify-between gap-2">
+            <div class="text-left min-w-0">
               <span class="text-[10px] text-slate-400 uppercase font-black tracking-wider block">Ritmo de Envejecimiento (Pace of Aging)</span>
-              <span id="hspan-pace-label" class="text-xs font-bold text-slate-200">Envejecimiento 12% más lento</span>
+              <span id="hspan-pace-label" class="text-xs font-bold text-slate-200 truncate block">Envejecimiento 12% más lento</span>
             </div>
-            <div class="text-right">
+            <div class="text-right shrink-0">
               <span id="hspan-pace-value" class="text-xl font-black font-mono text-[#00D2FF]">0.88x</span>
               <span class="text-[9px] text-slate-400 font-mono block">Norma: 1.00x</span>
             </div>
@@ -532,17 +553,17 @@
         </div>
       </div>
 
-      <!-- FICHA MÉDICA & PRÓXIMOS CONTROLES (EMILIO RANUK PROFILE) -->
+      <!-- FICHA MÉDICA & PRÓXIMOS CONTROLES (RE-ENGINEERED: ULTRA CLEAN) -->
       <div class="glass-card rounded-3xl p-4 space-y-3.5 border-rose-500/25">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
-            <div>
-              <h3 class="text-xs font-black uppercase tracking-wider text-white">Ficha Médica &amp; Agenda Preventiva</h3>
-              <p class="text-[10px] text-slate-400 font-medium">Historial Clínico de Emilio Ranucoli · Vigilancia Fisiológica</p>
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <svg class="w-4 h-4 text-rose-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
+            <div class="min-w-0">
+              <h3 class="text-xs font-black uppercase tracking-wider text-white truncate">FICHA MÉDICA PREVENTIVA</h3>
+              <p class="text-[10px] text-slate-400 font-medium truncate">Historial Clínico de Emilio Ranucoli</p>
             </div>
           </div>
-          <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 font-black uppercase border border-rose-500/30">
+          <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 font-black uppercase border border-rose-500/30 shrink-0">
             Triangulación Activa
           </span>
         </div>
@@ -551,112 +572,112 @@
         <div class="grid grid-cols-3 gap-2 text-center text-xs font-mono">
           <!-- Blood Type -->
           <div class="p-2.5 rounded-2xl bg-black/40 border border-white/5 space-y-1">
-            <span class="text-[9px] text-slate-400 uppercase font-bold block flex items-center justify-center gap-1">
+            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider block flex items-center justify-center gap-1">
               <svg class="w-3 h-3 text-rose-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-              Grupo
+              GRUPO
             </span>
             <span class="text-base font-black text-white">A+</span>
-            <span class="text-[8px] text-slate-400 block">Factor Rh Positivo</span>
+            <span class="text-[8px] text-slate-400 block font-sans">Rh Positivo</span>
           </div>
 
           <!-- Allergies -->
           <div class="p-2.5 rounded-2xl bg-black/40 border border-amber-500/20 space-y-1">
-            <span class="text-[9px] text-slate-400 uppercase font-bold block flex items-center justify-center gap-1">
+            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider block flex items-center justify-center gap-1">
               <svg class="w-3 h-3 text-amber-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/></svg>
-              Alergia
+              ALERGIA
             </span>
             <span class="text-[11px] font-bold text-amber-300 leading-tight block">Hormigas Coloradas</span>
-            <span class="text-[8px] text-amber-400/80 block">Solenopsis invicta</span>
+            <span class="text-[8px] text-amber-400/80 block font-mono">Solenopsis</span>
           </div>
 
           <!-- Dental Health -->
           <div class="p-2.5 rounded-2xl bg-black/40 border border-cyan-500/20 space-y-1">
-            <span class="text-[9px] text-slate-400 uppercase font-bold block flex items-center justify-center gap-1">
+            <span class="text-[9px] text-slate-400 uppercase font-bold tracking-wider block flex items-center justify-center gap-1">
               <svg class="w-3 h-3 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8 2 6 4 6 8c0 4 2 12 4 14s2-2 2-6c0 4 0 6 2 6s4-10 4-14c0-4-2-6-6-6z"/></svg>
-              Odontología
+              DENTAL
             </span>
             <span class="text-[11px] font-bold text-cyan-300 leading-tight block">Boca en Cero</span>
-            <span class="text-[8px] text-slate-400 block">Arreglo Junio 2026</span>
+            <span class="text-[8px] text-slate-400 block font-sans">Junio 2026</span>
           </div>
         </div>
 
         <!-- 42-DAY BLOOD TEST COUNTDOWN CARD -->
-        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-rose-950/40 via-purple-950/30 to-slate-900 border border-rose-500/40 flex items-center justify-between">
-          <div class="space-y-0.5">
+        <div class="p-3.5 rounded-2xl bg-gradient-to-r from-rose-950/40 via-purple-950/30 to-slate-900 border border-rose-500/40 flex items-center justify-between gap-3">
+          <div class="space-y-0.5 min-w-0">
             <div class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse"></span>
-              <span class="text-xs font-black uppercase text-white tracking-wider">Próximo Análisis de Sangre</span>
+              <span class="w-2 h-2 rounded-full bg-rose-400 animate-pulse shrink-0"></span>
+              <span class="text-xs font-black uppercase text-white tracking-wider truncate">PRÓXIMO ANÁLISIS DE SANGRE</span>
             </div>
-            <p class="text-[10px] text-slate-300 font-sans">
+            <p class="text-[10px] text-slate-300 font-sans leading-relaxed">
               Reevaluación de <strong>HOMA-IR (meta &lt; 2.0)</strong>, Insulina Basal y Lipídico tras ciclo de fuerza.
             </p>
             <span class="text-[9px] font-mono text-slate-400 block">Fecha recomendada: 08 de Diciembre, 2026</span>
           </div>
-          <div class="text-right pl-3 border-l border-white/10">
+          <div class="text-right pl-3 border-l border-white/10 shrink-0">
             <span id="days-to-blood-val" class="text-2xl font-black font-mono text-rose-400">42</span>
             <span class="text-[9px] font-mono text-slate-400 uppercase block">días restan</span>
           </div>
         </div>
 
         <!-- DENTAL NEXT CHECKUP -->
-        <div class="p-3 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between text-xs">
-          <div>
-            <span class="text-[10px] text-slate-400 uppercase font-bold block">Próximo Control Odontológico Preventivo</span>
-            <span class="font-bold text-slate-200">Limpieza y vigilancia para evitar endotoxemia bacteriana</span>
+        <div class="p-3 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between gap-2 text-xs">
+          <div class="min-w-0">
+            <span class="text-[10px] text-slate-400 uppercase font-bold block truncate">Control Odontológico Preventivo</span>
+            <span class="font-bold text-slate-200 truncate block">Profilaxis para evitar endotoxemia bacteriana</span>
           </div>
-          <div class="text-right font-mono">
+          <div class="text-right font-mono shrink-0">
             <span class="text-base font-black text-cyan-400">49</span>
             <span class="text-[9px] text-slate-500 block uppercase">días (15 Dic)</span>
           </div>
         </div>
       </div>
 
-      <!-- WHOOP HEALTH MONITOR (SEMÁFORO RECTANGULAR DE 5 BIOMARCADORES) -->
+      <!-- WHOOP HEALTH MONITOR (SEMÁFORO DE 5 BIOMARCADORES) -->
       <div class="glass-card rounded-3xl p-4 space-y-3 border border-emerald-500/25">
-        <div class="flex items-center justify-between">
-          <div>
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0">
             <div class="flex items-center gap-1.5">
-              <span class="w-2 h-2 rounded-full bg-[#00F59B] animate-pulse"></span>
-              <h3 class="text-xs font-black uppercase tracking-wider text-white">Monitor de Salud Fisiológica</h3>
+              <span class="w-2 h-2 rounded-full bg-[#00F59B] animate-pulse shrink-0"></span>
+              <h3 class="text-xs font-black uppercase tracking-wider text-white truncate">MONITOR DE SALUD</h3>
             </div>
-            <p class="text-[11px] text-slate-400">Semáforo de rangos típicos y calibración basal de 30 días</p>
+            <p class="text-[11px] text-slate-400 truncate">Rangos típicos y calibración basal de 30 días</p>
           </div>
-          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-[#00F59B] font-bold">5 / 5 En Rango</span>
+          <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-[#00F59B] font-bold shrink-0">5 / 5 En Rango</span>
         </div>
         <div id="health-monitor-grid" class="space-y-2.5"></div>
       </div>
 
       <!-- CLINICAL LAB PANEL (LABORATORIO FASOLIS AICARDI - PROTOCOLO 37314) -->
       <div class="glass-card rounded-3xl p-4 space-y-3 border border-cyan-500/25">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center gap-2">
-            <svg class="w-4 h-4 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
-            <div>
-              <h3 class="text-xs font-black uppercase tracking-wider text-white">Panel Clínico de Sangre</h3>
-              <p class="text-[10px] text-slate-400 font-medium">Laboratorio Fasolis Aicardi · Protocolo 37314</p>
+        <div class="flex items-center justify-between gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <svg class="w-4 h-4 text-cyan-400 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2.69l5.66 5.66a8 8 0 1 1-11.31 0z"/></svg>
+            <div class="min-w-0">
+              <h3 class="text-xs font-black uppercase tracking-wider text-white truncate">PANEL CLÍNICO DE SANGRE</h3>
+              <p class="text-[10px] text-slate-400 font-medium truncate">Laboratorio Fasolis Aicardi · Protocolo 37314</p>
             </div>
           </div>
-          <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-[#00D2FF] font-black uppercase">
-            Triangulación IA Activa
+          <span class="text-[9px] font-mono px-2 py-0.5 rounded bg-cyan-500/20 text-[#00D2FF] font-black uppercase shrink-0">
+            IA Activa
           </span>
         </div>
 
         <div class="grid grid-cols-2 gap-2.5 text-xs font-mono">
           <!-- HOMA-IR -->
           <div class="p-3 rounded-2xl bg-black/50 border border-amber-500/30 space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] text-slate-400">HOMA-IR (Insulina)</span>
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300">Alerta 5.14</span>
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[10px] text-slate-400 truncate">HOMA-IR (Insulina)</span>
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-300 shrink-0">5.14</span>
             </div>
             <div class="text-base font-black text-amber-300">5.14 <span class="text-[10px] text-slate-500 font-normal">/ max 2.6</span></div>
-            <span class="text-[9px] text-slate-400 block leading-tight font-sans">Resistencia insulínica compensada. El entreno de fuerza activa GLUT-4 directo.</span>
+            <span class="text-[9px] text-slate-400 block leading-tight font-sans">Hiperinsulinemia compensada. La sobrecarga muscular activa GLUT-4 directo.</span>
           </div>
 
           <!-- Castelli Index -->
           <div class="p-3 rounded-2xl bg-black/50 border border-emerald-500/30 space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] text-slate-400">Índice Castelli</span>
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-[#00F59B]">Óptimo 3.0</span>
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[10px] text-slate-400 truncate">Índice Castelli</span>
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-[#00F59B] shrink-0">Óptimo</span>
             </div>
             <div class="text-base font-black text-[#00F59B]">3.0 <span class="text-[10px] text-slate-500 font-normal">/ max 3.5</span></div>
             <span class="text-[9px] text-slate-400 block leading-tight font-sans">Colesterol 177, HDL 58, LDL 92. Mitad de riesgo cardiovascular estándar.</span>
@@ -664,19 +685,19 @@
 
           <!-- Fasting Glucose -->
           <div class="p-3 rounded-2xl bg-black/50 border border-white/10 space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] text-slate-400">Glucemia en Ayunas</span>
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-[#00F59B]">Normal</span>
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[10px] text-slate-400 truncate">Glucemia Ayunas</span>
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-[#00F59B] shrink-0">Normal</span>
             </div>
             <div class="text-base font-black text-white">88 <span class="text-[10px] text-slate-500 font-normal">mg/dL</span></div>
-            <span class="text-[9px] text-slate-400 block leading-tight font-sans">HbA1c 5.6%. Control glucémico mantenido por hiperinsulinemia basal (23.7).</span>
+            <span class="text-[9px] text-slate-400 block leading-tight font-sans">HbA1c 5.6%. Control glucémico mantenido por secreción basal de insulina.</span>
           </div>
 
           <!-- Renal & Thyroid -->
           <div class="p-3 rounded-2xl bg-black/50 border border-white/10 space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="text-[10px] text-slate-400">Filtración &amp; Tiroides</span>
-              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-[#00F59B]">Óptimo</span>
+            <div class="flex items-center justify-between gap-1">
+              <span class="text-[10px] text-slate-400 truncate">Filtración/Tiroides</span>
+              <span class="text-[9px] font-bold px-1.5 py-0.5 rounded bg-emerald-500/20 text-[#00F59B] shrink-0">Óptimo</span>
             </div>
             <div class="text-base font-black text-white">0.85 <span class="text-[10px] text-slate-500 font-normal">mg% Creat</span></div>
             <span class="text-[9px] text-slate-400 block leading-tight font-sans">TSH 1.56 µU/mL, Hemoglobina 15.2 g/dL (transporte de O₂ máximo).</span>
@@ -687,11 +708,11 @@
       <!-- WHOOP SEGMENTED MULTI-ZONE SLIDERS (IMAGE 3 REPLICA) -->
       <div class="glass-card rounded-3xl p-4 space-y-3.5 border-emerald-500/20">
         <div>
-          <div class="flex items-center justify-between">
-            <h3 class="text-xs font-black uppercase tracking-wider text-white">Biomarcadores &amp; Impacto en Años</h3>
-            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-[#00F59B] font-bold">WHOOP 5.0 Style</span>
+          <div class="flex items-center justify-between gap-2">
+            <h3 class="text-xs font-black uppercase tracking-wider text-white truncate">BIOMARCADORES &amp; IMPACTO EN AÑOS</h3>
+            <span class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/15 text-[#00F59B] font-bold shrink-0">WHOOP 5.0 Style</span>
           </div>
-          <p class="text-[11px] text-slate-400 mt-0.5">Barras segmentadas con apuntador de zona y balance de años biológicos</p>
+          <p class="text-[11px] text-slate-400 mt-0.5">Barras segmentadas con apuntador de zona y balance de longevidad celular</p>
         </div>
 
         <div id="segmented-biomarkers-container" class="space-y-3">
@@ -704,27 +725,27 @@
     <!-- ==================== TAB 3: STRESS 24H ==================== -->
     <section id="tab-stress" class="hidden space-y-3.5">
       <div class="glass-card rounded-3xl p-4 space-y-3">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-xs font-black uppercase tracking-wider text-white">Estrés Autonómico 24 Horas</h3>
-            <p class="text-[11px] text-slate-400">Curva de carga simpática y parasimpática diurna/nocturna</p>
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <h3 class="text-xs font-black uppercase tracking-wider text-white truncate">ESTRÉS AUTONÓMICO 24 HORAS</h3>
+            <p class="text-[11px] text-slate-400 truncate">Curva de carga simpática y parasimpática diurna/nocturna</p>
           </div>
-          <span id="stress-level-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-[#00F59B]">Estrés Bajo</span>
+          <span id="stress-level-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-[#00F59B] shrink-0">Estrés Bajo</span>
         </div>
         <div class="h-48 w-full relative">
           <canvas id="chart-stress-24h"></canvas>
         </div>
         <div class="grid grid-cols-3 gap-2 text-center pt-2 border-t border-white/5 text-xs font-mono">
           <div>
-            <span class="text-[10px] text-slate-400 block">Zona Reposo</span>
+            <span class="text-[10px] text-slate-400 block font-bold">REPOSO</span>
             <span class="font-bold text-cyan-400">&lt; 1.0</span>
           </div>
           <div>
-            <span class="text-[10px] text-slate-400 block">Zona Activa</span>
+            <span class="text-[10px] text-slate-400 block font-bold">ACTIVO</span>
             <span class="font-bold text-amber-400">1.0 – 2.0</span>
           </div>
           <div>
-            <span class="text-[10px] text-slate-400 block">Estrés Alto</span>
+            <span class="text-[10px] text-slate-400 block font-bold">ALTO</span>
             <span class="font-bold text-rose-400">&gt; 2.0</span>
           </div>
         </div>
@@ -734,25 +755,25 @@
     <!-- ==================== TAB 4: SLEEP LAB ==================== -->
     <section id="tab-sleep" class="hidden space-y-3.5">
       <div class="glass-card rounded-3xl p-4 space-y-3.5">
-        <div class="flex items-center justify-between">
-          <div>
-            <h3 class="text-xs font-black uppercase tracking-wider text-white">Arquitectura &amp; Calidad del Sueño</h3>
-            <p class="text-[11px] text-slate-400 font-mono" id="sleep-schedule-pill">23:38 ➔ 07:28</p>
+        <div class="flex items-center justify-between gap-2">
+          <div class="min-w-0">
+            <h3 class="text-xs font-black uppercase tracking-wider text-white truncate">ARQUITECTURA DEL SUEÑO</h3>
+            <p class="text-[11px] text-slate-400 font-mono truncate" id="sleep-schedule-pill">23:38 ➔ 07:28</p>
           </div>
-          <span id="slp-restorative-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-[#A855F7] font-bold">Restaurador: --h --m</span>
+          <span id="slp-restorative-badge" class="text-[10px] font-mono px-2 py-0.5 rounded bg-purple-500/20 text-[#A855F7] font-bold shrink-0">Restaurador: --h --m</span>
         </div>
 
         <div class="grid grid-cols-3 gap-2 text-center">
           <div class="p-2.5 rounded-2xl bg-black/40 border border-white/5">
-            <span class="text-[9px] text-slate-400 uppercase font-bold block">Duración</span>
+            <span class="text-[9px] text-slate-400 uppercase font-bold block tracking-wider">DURACIÓN</span>
             <span id="slp-hours-vs-need" class="text-sm font-black text-white font-mono">--.-h / --.-h</span>
           </div>
           <div class="p-2.5 rounded-2xl bg-black/40 border border-white/5">
-            <span class="text-[9px] text-slate-400 uppercase font-bold block">Eficiencia</span>
+            <span class="text-[9px] text-slate-400 uppercase font-bold block tracking-wider">EFICIENCIA</span>
             <span id="slp-efficiency" class="text-sm font-black text-[#00F59B] font-mono">--%</span>
           </div>
           <div class="p-2.5 rounded-2xl bg-black/40 border border-white/5">
-            <span class="text-[9px] text-slate-400 uppercase font-bold block">Deuda Sueño</span>
+            <span class="text-[9px] text-slate-400 uppercase font-bold block tracking-wider">DEUDA</span>
             <span id="slp-debt" class="text-sm font-black text-cyan-400 font-mono">-- min</span>
           </div>
         </div>
@@ -769,20 +790,20 @@
     <section id="tab-coach" class="hidden space-y-3.5">
       <!-- Chat Container -->
       <div class="glass-card rounded-3xl p-4 space-y-3">
-        <div class="flex items-center justify-between border-b border-white/10 pb-2.5">
-          <div class="flex items-center gap-2">
-            <div class="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-[#00F59B]">
+        <div class="flex items-center justify-between border-b border-white/10 pb-2.5 gap-2">
+          <div class="flex items-center gap-2 min-w-0">
+            <div class="w-7 h-7 rounded-lg bg-emerald-500/20 border border-emerald-400/40 flex items-center justify-center text-[#00F59B] shrink-0">
               <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"/><rect width="16" height="12" x="4" y="8" rx="2"/><path d="M2 14h2"/><path d="M20 14h2"/><path d="M15 13v2"/><path d="M9 13v2"/></svg>
             </div>
-            <div>
-              <h3 class="text-xs font-black uppercase text-white">Ranuk BioSpan AI Coach</h3>
-              <p class="text-[10px] text-slate-400 font-mono" id="ai-engine-label">DeepSeek-V3 · Motor Fisiológico</p>
+            <div class="min-w-0">
+              <h3 class="text-xs font-black uppercase text-white truncate">Ranuk BioSpan AI Coach</h3>
+              <p class="text-[10px] text-slate-400 font-mono truncate" id="ai-engine-label">DeepSeek-V3 · Motor Fisiológico</p>
             </div>
           </div>
-          <span class="w-2 h-2 rounded-full bg-[#00F59B] animate-pulse"></span>
+          <span class="w-2 h-2 rounded-full bg-[#00F59B] animate-pulse shrink-0"></span>
         </div>
 
-        <!-- Quick Prompts (Clean Line-Art Icons) -->
+        <!-- Quick Prompts -->
         <div class="flex gap-1.5 overflow-x-auto pb-1 pt-0.5 no-scrollbar">
           <button type="button" onclick="sendCoachQuick('¿Cómo maximizo mi recuperación hoy según mis métricas?')" class="px-2.5 py-1 rounded-xl glass-pill text-[10px] font-bold text-slate-300 whitespace-nowrap active:scale-95 transition">
             💡 Maximizar Recovery
@@ -802,7 +823,7 @@
 
         <form onsubmit="submitCoachForm(event)" class="flex gap-2 pt-2 border-t border-white/10">
           <input id="coach-input" type="text" placeholder="Pregúntale a tu Coach Fisiólogo..." class="flex-1 bg-slate-950 border border-slate-700 rounded-2xl px-3.5 py-2 text-white text-xs placeholder:text-slate-500 focus:outline-none focus:border-emerald-400" />
-          <button type="submit" id="coach-send-btn" class="px-4 py-2 rounded-2xl bg-[#00F59B] text-slate-950 font-black text-xs active:scale-95 transition">
+          <button type="submit" id="coach-send-btn" class="px-4 py-2 rounded-2xl bg-[#00F59B] text-slate-950 font-black text-xs active:scale-95 transition shrink-0">
             Enviar
           </button>
         </form>
@@ -821,15 +842,15 @@
     <!-- RANUK IT SOLUTIONS BRAND FOOTER -->
     <footer class="pt-6 pb-20 text-center space-y-2">
       <div class="flex items-center justify-center gap-2">
-        <div class="w-6 h-6 rounded-lg overflow-hidden border border-emerald-400/40 bg-slate-900 flex items-center justify-center glow-emerald">
+        <div class="w-6 h-6 rounded-lg overflow-hidden border border-emerald-400/40 bg-slate-900 flex items-center justify-center shadow-md shadow-emerald-500/20">
           <img src="/logo.png" alt="Ranuk" class="w-full h-full object-contain" />
         </div>
         <span class="text-xs font-black tracking-wider uppercase text-slate-200">RANUK IT SOLUTIONS</span>
       </div>
-      <p class="text-[11px] text-slate-400 font-medium leading-relaxed">
+      <p class="text-[11px] text-slate-400 font-medium leading-relaxed font-sans">
         Ranuk BioSpan 5.0 OS · Motor Fisiológico Autónomo &amp; Algoritmos Abiertos<br/>
         Calibrado para Xiaomi Watch S4 · Modelos de Longevidad PhenoAge (Levine et al.)<br/>
-        <a href="https://ranuk.dev" target="_blank" class="text-emerald-400 font-bold hover:underline">ranuk.dev</a>
+        <a href="https://ranuk.dev" target="_blank" class="text-emerald-400 font-bold hover:underline font-mono">ranuk.dev</a>
       </p>
     </footer>
 
@@ -860,7 +881,7 @@
         </div>
 
         <div class="grid grid-cols-2 gap-1.5 bg-slate-950 p-1 rounded-xl border border-slate-800 text-[11px] font-bold">
-          <button type="button" id="tab-btn-pass" onclick="switchAuthMode('pass')" class="py-1.5 rounded-lg bg-[#00F59B] text-slate-950 transition">
+          <button type="button" id="tab-btn-pass" onclick="switchAuthMode('pass')" class="py-1.5 rounded-lg bg-[#00F59B] text-slate-950 transition font-black">
             Email / Contraseña
           </button>
           <button type="button" id="tab-btn-qr" onclick="switchAuthMode('qr')" class="py-1.5 rounded-lg text-slate-400 hover:text-white transition">
@@ -1078,25 +1099,25 @@
       const desc = document.getElementById('inspector-desc');
 
       if (type === 'recovery') {
-        title.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#00F59B]"></span> Análisis de Recuperación Autonómica';
+        title.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#00F59B] shrink-0"></span> Análisis de Recuperación Autonómica';
         badge.textContent = `${t.recovery_score}% · ${t.recovery_score >= 67 ? 'Óptimo' : (t.recovery_score >= 34 ? 'Moderado' : 'Bajo')}`;
-        badge.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 text-[#00F59B]';
+        badge.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-emerald-500/15 text-[#00F59B] shrink-0';
         desc.innerHTML = `VFC: <strong>${t.hrv_ms} ms</strong> · FC en Reposo: <strong>${t.rhr} lpm</strong> · SpO₂: <strong>${t.spo2}%</strong>. Tu sistema parasimpático está respondiendo de forma balanceada.`;
       } else if (type === 'strain') {
-        title.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#00D2FF]"></span> Carga Cardiovascular & Muscular';
+        title.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#00D2FF] shrink-0"></span> Carga Cardiovascular & Muscular';
         badge.textContent = `Strain ${t.day_strain} / 21.0`;
-        badge.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-cyan-500/15 text-[#00D2FF]';
+        badge.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-cyan-500/15 text-[#00D2FF] shrink-0';
         desc.innerHTML = `Calorías activas: <strong>${t.calories_active} kcal</strong> · Pasos: <strong>${t.steps.toLocaleString()}</strong> · Meta recomendada hoy: <strong>${t.strain_target.min} – ${t.strain_target.max}</strong>.`;
       } else if (type === 'sleep') {
-        title.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#A855F7]"></span> Arquitectura de Sueño Nocturno';
+        title.innerHTML = '<span class="w-2 h-2 rounded-full bg-[#A855F7] shrink-0"></span> Arquitectura de Sueño Nocturno';
         badge.textContent = `${t.sleep_performance}% Performance`;
-        badge.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-purple-500/15 text-[#A855F7]';
+        badge.className = 'font-mono text-[10px] px-2 py-0.5 rounded bg-purple-500/15 text-[#A855F7] shrink-0';
         const restM = t.deep_sleep_min + t.rem_sleep_min;
         desc.innerHTML = `Duración: <strong>${t.sleep_hours.toFixed(1)}h</strong> · Sueño Restaurador (Profundo + REM): <strong>${Math.floor(restM/60)}h ${restM%60}m</strong> · Deuda: <strong>${t.sleep_debt_min} min</strong>.`;
       }
     }
 
-    // Dynamic Bioluminescent Cellular Particles in Healthspan Orb
+    // Dynamic Bioluminescent Cellular Particles in Healthspan Orb (Smooth, Organic)
     function initOrbParticles() {
       const canvas = document.getElementById('healthspan-orb-canvas');
       if (!canvas) return;
@@ -1105,20 +1126,20 @@
       const h = canvas.height;
       const centerX = w / 2;
       const centerY = h / 2;
-      const radius = w / 2 - 10;
+      const radius = w / 2 - 12;
 
       const particles = [];
-      const particleCount = 42;
+      const particleCount = 48;
       for (let i = 0; i < particleCount; i++) {
         const angle = Math.random() * Math.PI * 2;
-        const dist = Math.random() * (radius - 20) + 10;
+        const dist = Math.random() * (radius - 22) + 12;
         particles.push({
           x: centerX + Math.cos(angle) * dist,
           y: centerY + Math.sin(angle) * dist,
-          r: Math.random() * 2.2 + 0.8,
-          color: Math.random() > 0.4 ? 'rgba(0, 245, 155,' : (Math.random() > 0.5 ? 'rgba(0, 210, 255,' : 'rgba(168, 85, 247,'),
-          alpha: Math.random() * 0.7 + 0.2,
-          speed: Math.random() * 0.008 + 0.003,
+          r: Math.random() * 2.4 + 0.8,
+          color: Math.random() > 0.45 ? 'rgba(0, 245, 155,' : (Math.random() > 0.5 ? 'rgba(0, 210, 255,' : 'rgba(168, 85, 247,'),
+          alpha: Math.random() * 0.75 + 0.25,
+          speed: (Math.random() * 0.007 + 0.003) * (Math.random() > 0.5 ? 1 : -1),
           angle: angle,
           dist: dist
         });
@@ -1136,7 +1157,7 @@
           ctx.beginPath();
           ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
           ctx.fillStyle = p.color + p.alpha + ')';
-          ctx.shadowBlur = 10;
+          ctx.shadowBlur = 12;
           ctx.shadowColor = '#00F59B';
           ctx.fill();
         }
@@ -1177,8 +1198,10 @@
       if (xc.connected && xc.synced_days > 0) {
         unconnBanner.classList.add('hidden');
         connBanner.classList.remove('hidden');
-        document.getElementById('xiaomi-connected-text').textContent =
-          `Mi Fitness Cloud (ID: ${xc.user_id} · ${(xc.region || 'DE').toUpperCase()}) · ${xc.synced_days} días reales`;
+        document.getElementById('xiaomi-connected-badge').textContent =
+          `${(xc.region || 'DE').toUpperCase()} · ${xc.synced_days}D SINCRONIZADOS`;
+        document.getElementById('xiaomi-user-label').textContent =
+          `Usuario Mi Fitness: ${xc.user_id}`;
         if (modalBadge) {
           modalBadge.textContent = `Conectado (${xc.synced_days}d)`;
           modalBadge.className = 'text-[10px] font-mono px-2 py-0.5 rounded bg-emerald-500/20 text-[#00F59B]';
@@ -1193,7 +1216,7 @@
         : `Xiaomi Watch S4 · Conectar Mi Fitness`;
 
       document.getElementById('today-date-label').textContent = `HOY (${t.date}) · BIOMETRÍA EN VIVO`;
-      document.getElementById('strain-goal-badge').textContent = `Meta Strain: ${t.strain_target.min} – ${t.strain_target.max}`;
+      document.getElementById('strain-goal-badge').textContent = `Meta: ${t.strain_target.min} – ${t.strain_target.max}`;
 
       // Recovery Ring
       document.getElementById('val-recovery').textContent = `${t.recovery_score}%`;
@@ -1210,17 +1233,17 @@
       document.getElementById('sub-sleep').textContent = `${t.sleep_hours.toFixed(1)}h de ${t.sleep_need_hours.toFixed(1)}h`;
       setRing('ring-sleep', t.sleep_performance);
 
-      // Strain Details Card (Image 2 Replica)
+      // Strain Details Card (Accurate telemetry)
       const hz = t.hr_zones || {z1:0, z2:0, z3:0, z4:0, z5:0};
       const z13Min = (hz.z1 || 0) + (hz.z2 || 0) + (hz.z3 || 0);
       const z45Min = (hz.z4 || 0) + (hz.z5 || 0);
       const workouts = t.workouts || [];
       const primaryW = workouts[0] || {};
 
-      document.getElementById('strain-time-z13').textContent = `${z13Min || 38} min`;
-      document.getElementById('strain-time-z45').textContent = `${z45Min || 14} min`;
-      document.getElementById('strain-time-strength').textContent = `${primaryW.duration_min || 45} min`;
-      document.getElementById('strain-hr-stats').textContent = `${primaryW.avg_hr || 156} / ${primaryW.max_hr || 181}`;
+      document.getElementById('strain-time-z13').textContent = `${z13Min} min`;
+      document.getElementById('strain-time-z45').textContent = `${z45Min} min`;
+      document.getElementById('strain-time-strength').textContent = `${primaryW.duration_min || 0} min`;
+      document.getElementById('strain-hr-stats').textContent = primaryW.avg_hr ? `${primaryW.avg_hr} / ${primaryW.max_hr}` : `${t.rhr} / ${p.max_hr || 193}`;
 
       // Executive Briefing
       document.getElementById('executive-briefing-text').textContent = t.briefing;
@@ -1233,7 +1256,7 @@
       document.getElementById('val-spo2').textContent = t.spo2.toFixed(1);
       document.getElementById('val-vo2').textContent = t.vo2_max.toFixed(1);
 
-      // Healthspan Tab & Orb
+      // Healthspan Tab & Orb (100% transparent and seamless)
       document.getElementById('hspan-chrono-age').textContent = h.chronological_age.toFixed(1);
       document.getElementById('hspan-whoop-age').textContent = h.whoop_age.toFixed(1);
       const deltaSign = h.age_delta > 0 ? `+${h.age_delta}` : `${h.age_delta}`;
@@ -1241,7 +1264,7 @@
         ? `${Math.abs(h.age_delta).toFixed(1)} AÑOS MÁS JOVEN` 
         : `+${h.age_delta.toFixed(1)} AÑOS`;
       document.getElementById('hspan-delta-badge').innerHTML = `
-        <svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
+        <svg class="w-3 h-3 text-[#00F59B]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>
         <span>${badgeText}</span>
       `;
       document.getElementById('hspan-pace-value').textContent = `${h.pace_of_aging.toFixed(2)}x`;
@@ -1273,18 +1296,18 @@
           const pos = Math.min(94, Math.max(6, ((m.current - m.min_normal) / rangeSpan) * 100));
 
           return `
-            <div class="p-3.5 rounded-2xl bg-black/50 border border-white/10 hover:border-emerald-500/30 transition space-y-2">
-              <div class="flex items-start justify-between">
-                <div class="flex items-center gap-2.5">
-                  <div class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400">
+            <div class="p-3 rounded-2xl bg-black/50 border border-white/10 hover:border-emerald-500/30 transition space-y-2">
+              <div class="flex items-start justify-between gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-emerald-400 shrink-0">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>
                   </div>
-                  <div>
-                    <span class="text-xs font-black text-white block">${m.name}</span>
-                    <span class="text-[10px] text-slate-400 font-mono">Línea base 30d: <strong>${m.baseline} ${m.unit}</strong></span>
+                  <div class="min-w-0">
+                    <span class="text-xs font-black text-white block truncate">${m.name}</span>
+                    <span class="text-[10px] text-slate-400 font-mono truncate block">Línea base: <strong>${m.baseline} ${m.unit}</strong></span>
                   </div>
                 </div>
-                <div class="text-right">
+                <div class="text-right shrink-0">
                   <span class="text-sm font-black font-mono text-white">${m.value} <span class="text-[10px] text-slate-400 font-normal">${m.unit}</span></span>
                   <span class="block text-[9px] font-mono px-2 py-0.5 rounded-full border ${badgeClass} font-bold mt-0.5">
                     ✓ ${m.status_text}
@@ -1312,8 +1335,8 @@
       // Heart Rate Training Zones
       const hzTotal = Math.max(1, (hz.z1||0) + (hz.z2||0) + (hz.z3||0) + (hz.z4||0) + (hz.z5||0));
       const zoneDefs = [
-        {name: 'Zona 1 (50-60% · Recuperación Activa)', min: hz.z1||0, color: 'bg-slate-400'},
-        {name: 'Zona 2 (60-70% · Base Aeróbica Mitocondrial)', min: hz.z2||0, color: 'bg-[#00D2FF]'},
+        {name: 'Zona 1 (50-60% · Recuperación)', min: hz.z1||0, color: 'bg-slate-400'},
+        {name: 'Zona 2 (60-70% · Base Mitocondrial)', min: hz.z2||0, color: 'bg-[#00D2FF]'},
         {name: 'Zona 3 (70-80% · Umbral Aeróbico)', min: hz.z3||0, color: 'bg-[#00F59B]'},
         {name: 'Zona 4 (80-90% · Umbral Anaeróbico)', min: hz.z4||0, color: 'bg-amber-400'},
         {name: 'Zona 5 (90-100% · Capacidad VO₂ Pico)', min: hz.z5||0, color: 'bg-rose-500'},
@@ -1323,8 +1346,8 @@
         return `
           <div class="space-y-1">
             <div class="flex justify-between text-[11px] font-mono">
-              <span class="text-slate-300 font-medium">${zd.name}</span>
-              <span class="font-bold text-white">${zd.min}m (${pct}%)</span>
+              <span class="text-slate-300 font-medium truncate">${zd.name}</span>
+              <span class="font-bold text-white shrink-0">${zd.min}m (${pct}%)</span>
             </div>
             <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
               <div class="${zd.color} h-2 rounded-full" style="width:${pct}%"></div>
@@ -1335,21 +1358,21 @@
 
       // Workouts list
       const wList = document.getElementById('workouts-list');
-      document.getElementById('workouts-count-badge').textContent = `${workouts.length} sesiones`;
+      document.getElementById('workouts-count-badge').textContent = `${workouts.length} registradas`;
       if (workouts.length) {
         wList.innerHTML = workouts.map(w => {
-          const strainPill = w.strain ? `<span class="px-2 py-0.5 rounded-lg bg-cyan-500/20 text-[#00D2FF] font-mono font-bold text-[10px] border border-cyan-500/30">Strain ${w.strain}</span>` : '';
+          const strainPill = w.strain ? `<span class="px-2 py-0.5 rounded-lg bg-cyan-500/20 text-[#00D2FF] font-mono font-bold text-[10px] border border-cyan-500/30 shrink-0">Strain ${w.strain}</span>` : '';
           return `
             <div class="p-3.5 rounded-2xl bg-gradient-to-r from-slate-900/90 via-slate-900/70 to-slate-900/90 border border-white/10 hover:border-cyan-500/40 transition space-y-2.5">
-              <div class="flex items-center justify-between">
-                <div class="flex items-center gap-2.5">
-                  <div class="w-9 h-9 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400">
+              <div class="flex items-center justify-between gap-2">
+                <div class="flex items-center gap-2.5 min-w-0">
+                  <div class="w-9 h-9 rounded-2xl bg-cyan-500/10 border border-cyan-500/30 flex items-center justify-center text-cyan-400 shrink-0">
                     <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
                   </div>
-                  <div>
-                    <h4 class="text-xs font-black text-white tracking-tight uppercase">${w.name || w.type || 'Entrenamiento'}</h4>
-                    <span class="text-[10px] text-slate-400 font-medium flex items-center gap-1">
-                      <span class="w-1.5 h-1.5 rounded-full bg-cyan-400"></span>
+                  <div class="min-w-0">
+                    <h4 class="text-xs font-black text-white tracking-tight uppercase truncate">${w.name || w.type || 'Entrenamiento'}</h4>
+                    <span class="text-[10px] text-slate-400 font-medium flex items-center gap-1 truncate">
+                      <span class="w-1.5 h-1.5 rounded-full bg-cyan-400 shrink-0"></span>
                       Xiaomi Watch S4 · Sensor Óptico
                     </span>
                   </div>
@@ -1358,15 +1381,15 @@
               </div>
               <div class="grid grid-cols-3 gap-2 pt-2 border-t border-white/5 text-center font-mono text-[10px]">
                 <div class="p-1.5 rounded-xl bg-black/40 border border-white/5">
-                  <span class="text-slate-400 block text-[9px]">DURACIÓN</span>
+                  <span class="text-slate-400 block text-[9px] uppercase font-bold">DURACIÓN</span>
                   <span class="font-bold text-white">${w.duration_min} min</span>
                 </div>
                 <div class="p-1.5 rounded-xl bg-black/40 border border-white/5">
-                  <span class="text-slate-400 block text-[9px]">FC MEDIA / MÁX</span>
+                  <span class="text-slate-400 block text-[9px] uppercase font-bold">FC MED / MÁX</span>
                   <span class="font-bold text-rose-400">${w.avg_hr || '--'} / ${w.max_hr || '--'}</span>
                 </div>
                 <div class="p-1.5 rounded-xl bg-black/40 border border-white/5">
-                  <span class="text-slate-400 block text-[9px]">CALORÍAS</span>
+                  <span class="text-slate-400 block text-[9px] uppercase font-bold">CALORÍAS</span>
                   <span class="font-bold text-amber-400">${w.kcal || '--'} kcal</span>
                 </div>
               </div>
@@ -1387,7 +1410,7 @@
 
       const totSlpM = Math.max(1, t.deep_sleep_min + t.rem_sleep_min + t.light_sleep_min + t.awake_min);
       const stagesMeta = [
-        {name: 'Sueño Profundo (SWS · Reparación Celular)', min: t.deep_sleep_min, c: 'bg-indigo-500'},
+        {name: 'Sueño Profundo (SWS · Reparación)', min: t.deep_sleep_min, c: 'bg-indigo-500'},
         {name: 'Sueño REM (Restauración Cognitiva)', min: t.rem_sleep_min, c: 'bg-[#A855F7]'},
         {name: 'Sueño Ligero (Transición)', min: t.light_sleep_min, c: 'bg-[#00D2FF]'},
         {name: 'Despierto / Micro-despertares', min: t.awake_min, c: 'bg-[#FF3366]'},
@@ -1398,8 +1421,8 @@
         return `
           <div class="space-y-1">
             <div class="flex justify-between text-[11px] font-mono">
-              <span class="text-slate-300 font-medium">${sm.name}</span>
-              <span class="font-bold text-white">${hStr} (${pct}%)</span>
+              <span class="text-slate-300 font-medium truncate">${sm.name}</span>
+              <span class="font-bold text-white shrink-0">${hStr} (${pct}%)</span>
             </div>
             <div class="w-full h-2 bg-slate-800 rounded-full overflow-hidden">
               <div class="${sm.c} h-2 rounded-full" style="width:${pct}%"></div>
@@ -1431,7 +1454,6 @@
           ? 'text-[#00F59B] bg-emerald-500/15 border-emerald-500/30' 
           : 'text-amber-400 bg-amber-500/15 border-amber-500/30';
 
-        // Calculate slider pointer percentage: default 75% for optimal, 35% for warning
         let pointerPct = 78;
         if (bm.id === 'clinical_homa' || bm.impact_years > 0) {
           pointerPct = 32;
@@ -1443,17 +1465,17 @@
 
         return `
           <div class="p-3.5 rounded-2xl bg-black/45 border border-white/10 hover:border-emerald-500/30 transition space-y-2.5">
-            <div class="flex items-center justify-between">
-              <div class="flex items-center gap-2">
-                <div class="w-6 h-6 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-300">
+            <div class="flex items-center justify-between gap-2">
+              <div class="flex items-center gap-2 min-w-0">
+                <div class="w-6 h-6 rounded-lg bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 shrink-0">
                   <svg class="w-3.5 h-3.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>
                 </div>
-                <div>
-                  <h4 class="text-xs font-bold text-white tracking-wide">${bm.label}</h4>
-                  <span class="text-[10px] text-slate-400 font-mono">Actual: <strong>${bm.value}</strong> · Objetivo: ${bm.target}</span>
+                <div class="min-w-0">
+                  <h4 class="text-xs font-bold text-white tracking-wide truncate">${bm.label}</h4>
+                  <span class="text-[10px] text-slate-400 font-mono truncate block">Actual: <strong>${bm.value}</strong> · Objetivo: ${bm.target}</span>
                 </div>
               </div>
-              <span class="text-xs font-mono font-black px-2.5 py-1 rounded-xl border ${badgeColor}">
+              <span class="text-xs font-mono font-black px-2.5 py-1 rounded-xl border ${badgeColor} shrink-0">
                 ${signStr}
               </span>
             </div>
@@ -1561,7 +1583,7 @@ https://hub.ranuk.dev/whoop`;
       const msgs = STATE.chat_history || [];
       if (!msgs.length) {
         box.innerHTML = `
-          <div class="p-3.5 rounded-2xl bg-black/40 border border-white/10 text-xs text-slate-200 leading-relaxed">
+          <div class="p-3.5 rounded-2xl bg-black/40 border border-white/10 text-xs text-slate-200 leading-relaxed font-sans">
             Hola Emilio. Tengo en vivo los datos de tu <strong>Xiaomi Watch S4</strong>: hoy tu Recovery está al <strong>${STATE.today.recovery_score}%</strong>, tu HRV en <strong>${STATE.today.hrv_ms} ms</strong> y tu Edad Biológica en <strong>${STATE.healthspan.whoop_age} años</strong>. Además, tengo en cuenta tu informe de laboratorio (HOMA-IR ${STATE.clinical_lab ? STATE.clinical_lab.homa_ir : '5.14'}). ¿Qué quieres optimizar hoy?
           </div>
         `;
@@ -1571,7 +1593,7 @@ https://hub.ranuk.dev/whoop`;
         const isUser = m.role === 'user';
         return `
           <div class="flex ${isUser ? 'justify-end' : 'justify-start'}">
-            <div class="max-w-[88%] p-3.5 rounded-2xl text-xs leading-relaxed ${isUser ? 'bg-gradient-to-r from-[#00F59B] to-[#00D2FF] text-slate-950 font-bold shadow-md' : 'bg-black/60 border border-white/10 text-slate-200'}">
+            <div class="max-w-[88%] p-3.5 rounded-2xl text-xs leading-relaxed ${isUser ? 'bg-gradient-to-r from-[#00F59B] to-[#00D2FF] text-slate-950 font-bold shadow-md' : 'bg-black/60 border border-white/10 text-slate-200 font-sans'}">
               ${isUser ? m.content : formatMarkdown(m.content)}
             </div>
           </div>
@@ -1587,21 +1609,21 @@ https://hub.ranuk.dev/whoop`;
         const badgeC = pos ? 'text-[#00F59B] bg-emerald-500/10 border-emerald-500/20' : 'text-[#FF3366] bg-rose-500/10 border-rose-500/20';
         const activeBtn = j.active
           ? 'bg-[#00F59B] text-slate-950 border-[#00F59B] font-black shadow-md'
-          : 'bg-slate-900 text-slate-400 border-slate-700';
+          : 'bg-slate-900 text-slate-400 border-slate-700 font-semibold';
         return `
-          <div class="p-3 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between">
-            <div class="flex items-center gap-2.5">
-              <div class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300">
+          <div class="p-3 rounded-2xl bg-black/40 border border-white/5 flex items-center justify-between gap-2">
+            <div class="flex items-center gap-2.5 min-w-0">
+              <div class="w-8 h-8 rounded-xl bg-white/5 border border-white/10 flex items-center justify-center text-slate-300 shrink-0">
                 <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"/></svg>
               </div>
-              <div>
-                <span class="text-xs font-bold text-slate-200 block">${j.label}</span>
-                <span class="text-[10px] font-mono px-2 py-0.5 rounded border ${badgeC}">
-                  Impacto estimado: ${pos ? '+' : ''}${j.impact_recovery}% Recovery
+              <div class="min-w-0">
+                <span class="text-xs font-bold text-slate-200 block truncate">${j.label}</span>
+                <span class="text-[10px] font-mono px-2 py-0.5 rounded border ${badgeC} inline-block mt-0.5">
+                  Impacto: ${pos ? '+' : ''}${j.impact_recovery}% Recovery
                 </span>
               </div>
             </div>
-            <button onclick="toggleJournal('${j.id}', ${!j.active})" class="px-3.5 py-1.5 rounded-xl border text-xs transition active:scale-95 ${activeBtn}">
+            <button onclick="toggleJournal('${j.id}', ${!j.active})" class="px-3.5 py-1.5 rounded-xl border text-xs transition active:scale-95 ${activeBtn} shrink-0">
               ${j.active ? '✓ Activo' : 'No'}
             </button>
           </div>
@@ -1817,10 +1839,10 @@ https://hub.ranuk.dev/whoop`;
       document.getElementById('auth-mode-qr').classList.toggle('hidden', isPass);
       document.getElementById('tab-btn-pass').className = isPass
         ? 'py-1.5 rounded-lg bg-[#00F59B] text-slate-950 font-black transition'
-        : 'py-1.5 rounded-lg text-slate-400 hover:text-white transition';
+        : 'py-1.5 rounded-lg text-slate-400 hover:text-white transition font-medium';
       document.getElementById('tab-btn-qr').className = !isPass
         ? 'py-1.5 rounded-lg bg-[#00D2FF] text-slate-950 font-black transition'
-        : 'py-1.5 rounded-lg text-slate-400 hover:text-white transition';
+        : 'py-1.5 rounded-lg text-slate-400 hover:text-white transition font-medium';
     }
 
     function showXiaomiFeedback(msg, isError = false) {
@@ -2022,7 +2044,7 @@ https://hub.ranuk.dev/whoop`;
           }
         }
       } finally {
-        if (btn) btn.innerHTML = '<svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg><span>Sync 30d</span>';
+        if (btn) btn.innerHTML = '<svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg><span>Sync</span>';
       }
     }
 
