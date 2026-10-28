@@ -176,8 +176,8 @@
         <svg class="w-3.5 h-3.5 text-cyan-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
         <span>Hub</span>
       </a>
-      <button onclick="openSyncModal()" class="p-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-300 hover:text-white active:scale-95 transition" title="Sincronización Cloud">
-        <svg class="w-4 h-4 text-emerald-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
+      <button id="header-sync-btn" onclick="triggerBackendSync()" class="p-1.5 rounded-xl bg-white/[0.04] hover:bg-white/[0.08] border border-white/10 text-slate-300 hover:text-white active:scale-95 transition" title="Sincronizar Cloud Ahora">
+        <svg id="header-sync-icon" class="w-4 h-4 text-emerald-400 transition-transform" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg>
       </button>
     </div>
   </header>
@@ -186,7 +186,7 @@
   <main class="px-3 pt-3 space-y-3.5 max-w-xl mx-auto">
 
     <!-- CONNECTION STATUS BANNERS -->
-    <div id="xiaomi-banner-unconnected" class="p-3.5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-cyan-500/15 border border-amber-400/40 space-y-2.5">
+    <div id="xiaomi-banner-unconnected" class="hidden p-3.5 rounded-3xl bg-gradient-to-r from-amber-500/15 via-emerald-500/10 to-cyan-500/15 border border-amber-400/40 space-y-2.5">
       <div class="flex items-start justify-between gap-2">
         <div>
           <span class="text-[10px] font-black uppercase tracking-wider px-2 py-0.5 rounded bg-amber-400/20 text-amber-300 border border-amber-400/30 flex items-center gap-1 w-fit">
@@ -1166,13 +1166,25 @@
       draw();
     }
 
-    async function loadDashboard() {
+    async function loadDashboard(isInitial = true) {
       try {
         const res = await fetch('/api/whoop');
         const data = await res.json();
         if (data && data.ok) {
           STATE = data;
           renderAll();
+
+          // Sincronización automática silenciosa al abrir la app:
+          // Si la cuenta está conectada y pasaron más de 8 minutos desde la última sincronización,
+          // sincroniza en segundo plano sin molestar al usuario ni abrir modales.
+          const lastSyncStr = (STATE.xiaomi_cloud && STATE.xiaomi_cloud.last_sync_at) || '';
+          const lastSync = lastSyncStr ? new Date(lastSyncStr).getTime() : 0;
+          const minutesSinceSync = (Date.now() - lastSync) / 60000;
+
+          if (isInitial && STATE.xiaomi_cloud && STATE.xiaomi_cloud.connected && minutesSinceSync > 8) {
+            triggerSilentBackgroundSync();
+          }
+
           const urlParams = new URLSearchParams(window.location.search);
           if (urlParams.get('connect') === '1' && (!STATE.xiaomi_cloud || !STATE.xiaomi_cloud.connected)) {
             openSyncModal();
@@ -1180,6 +1192,34 @@
         }
       } catch (err) {
         console.error('Error cargando /api/whoop:', err);
+      }
+    }
+
+    let isSilentSyncing = false;
+    async function triggerSilentBackgroundSync() {
+      if (isSilentSyncing) return;
+      isSilentSyncing = true;
+      const hdrIcon = document.getElementById('header-sync-icon');
+      const badge = document.getElementById('xiaomi-connected-badge');
+      if (hdrIcon) hdrIcon.classList.add('animate-spin');
+      if (badge) badge.textContent = 'AUTO-SYNC...';
+
+      try {
+        const res = await fetch('/api/whoop/sync', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({days: 7})
+        });
+        const data = await res.json();
+        if (data && data.ok) {
+          STATE = data;
+          renderAll();
+        }
+      } catch (e) {
+        console.log('Silent auto-sync:', e);
+      } finally {
+        isSilentSyncing = false;
+        if (hdrIcon) hdrIcon.classList.remove('animate-spin');
       }
     }
 
@@ -2043,19 +2083,29 @@ https://hub.ranuk.dev/whoop`;
     async function triggerBackendSync() {
       haptic('medium');
       const btn = document.getElementById('btn-quick-resync');
-      if (btn) btn.textContent = 'Sync...';
+      const hdrIcon = document.getElementById('header-sync-icon');
+      if (btn) btn.innerHTML = '<span class="inline-block animate-spin mr-1">↻</span><span>Sync...</span>';
+      if (hdrIcon) hdrIcon.classList.add('animate-spin');
+
       try {
-        const res = await fetch('/api/whoop/sync', {method: 'POST'});
+        const res = await fetch('/api/whoop/sync', {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({days: 35})
+        });
         const data = await res.json();
         if (data && data.ok) {
           STATE = data;
           renderAll();
           if (data.sync_result && data.sync_result.ok) {
-            showXiaomiFeedback(`Sincronizados ${data.sync_result.synced_days} días desde Mi Fitness Cloud.`, false);
+            showXiaomiFeedback(`✅ Sincronizados ${data.sync_result.synced_days} días y ${data.recent_workouts ? data.recent_workouts.length : 0} entrenamientos de Xiaomi Cloud.`, false);
           }
         }
+      } catch (err) {
+        showXiaomiFeedback(`Error de red al sincronizar: ${err.message}`, true);
       } finally {
         if (btn) btn.innerHTML = '<svg class="w-3 h-3" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12a9 9 0 0 0-9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"/><path d="M3 3v5h5"/><path d="M3 12a9 9 0 0 0 9 9 9.75 9.75 0 0 0 6.74-2.74L21 16"/><path d="M16 21h5v-5"/></svg><span>Sync</span>';
+        if (hdrIcon) hdrIcon.classList.remove('animate-spin');
       }
     }
 
