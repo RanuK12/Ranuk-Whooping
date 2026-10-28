@@ -168,13 +168,37 @@ def compute_recovery_score(
     return int(max(5, min(99, round(score))))
 
 
-def compute_day_strain(hr_zones: Dict[str, int], strength_min: int = 0, steps: int = 0) -> float:
-    """Escala logarítmica Borg 0.0 - 21.0 (TRIMP ponderado por zonas cardíacas + carga muscular)."""
+def compute_day_strain(
+    hr_zones: Dict[str, int],
+    strength_min: int = 0,
+    steps: int = 0,
+    workouts: Optional[List[Dict[str, Any]]] = None,
+    calories_active: int = 0,
+) -> float:
+    """Escala logarítmica Borg 0.0 - 21.0 (TRIMP ponderado por zonas cardíacas + carga muscular + sesiones de entrenamiento)."""
     weights = {"z1": 0.15, "z2": 0.45, "z3": 1.15, "z4": 2.40, "z5": 4.20}
     trimp = sum(float(hr_zones.get(k, 0)) * w for k, w in weights.items())
+
+    # Carga de entrenamientos directos
+    workout_load = 0.0
+    for w in (workouts or []):
+        dur = float(w.get("duration_min", 0) or 0)
+        kcal = float(w.get("kcal", 0) or 0)
+        avg_hr = float(w.get("avg_hr", 0) or 0)
+        max_hr = float(w.get("max_hr", 0) or 0)
+        mult = 1.0
+        if max_hr >= 175 or avg_hr >= 150:
+            mult = 1.6
+        elif max_hr >= 155 or avg_hr >= 135:
+            mult = 1.3
+        elif max_hr >= 125 or avg_hr >= 110:
+            mult = 1.15
+        workout_load += (kcal * 0.16 + dur * 0.75) * mult
+
     muscular_load = strength_min * 1.35
     ambulatory_load = (steps / 1000.0) * 1.1
-    total_load = trimp + muscular_load + ambulatory_load
+    active_cal_load = max(0.0, (calories_active - 300) * 0.05) if calories_active else 0.0
+    total_load = trimp + workout_load + muscular_load + ambulatory_load + active_cal_load
 
     if total_load <= 1.0:
         return 2.1
@@ -719,6 +743,7 @@ def get_whoop_dashboard() -> Dict[str, Any]:
     # Serie histórica resumida de 14 y 30 días para gráficos
     history_series = []
     for d in days[-14:]:
+        d_w = json.loads(d.get("workouts_json") or "[]") if isinstance(d.get("workouts_json"), str) else (d.get("workouts_json") or [])
         history_series.append({
             "date": d["date"][5:],  # MM-DD
             "full_date": d["date"],
@@ -733,7 +758,21 @@ def get_whoop_dashboard() -> Dict[str, Any]:
             "vo2_max": d["vo2_max"],
             "steps": d["steps"],
             "restorative_h": round((d["deep_sleep_min"] + d["rem_sleep_min"]) / 60.0, 2),
+            "workouts": d_w,
         })
+
+    # Lista consolidada de entrenamientos recientes para acceso directo
+    recent_workouts = []
+    for d in reversed(days):
+        d_w = json.loads(d.get("workouts_json") or "[]") if isinstance(d.get("workouts_json"), str) else (d.get("workouts_json") or [])
+        for w in d_w:
+            recent_workouts.append({
+                **w,
+                "date": d["date"],
+                "is_today": (d["date"] == today_date),
+            })
+        if len(recent_workouts) >= 8:
+            break
 
     # Briefing automático ejecutivo para hoy
     rec = today_data.get("recovery_score", 80)
@@ -831,6 +870,7 @@ def get_whoop_dashboard() -> Dict[str, Any]:
         "clinical_lab": clinical_lab,
         "medical_schedule": medical_schedule,
         "history_14d": history_series,
+        "recent_workouts": recent_workouts,
         "journal": journal_items,
         "chat_history": chat_history,
     }
@@ -913,7 +953,7 @@ def ingest_wearable_payload(payload: Dict[str, Any]) -> Dict[str, Any]:
         rec_score = int(payload.get("recovery_score") or compute_recovery_score(
             hrv_ms, rhr, sleep_perf, spo2, prof["baseline_hrv"], prof["baseline_rhr"]
         ))
-        day_strain = float(payload.get("day_strain") or compute_day_strain(hr_zones, strength_min, steps))
+        day_strain = float(payload.get("day_strain") or compute_day_strain(hr_zones, strength_min, steps, workouts, cal_active))
 
         intraday = payload.get("intraday_stress") or json.loads(cur.get("intraday_stress_json") or "[]")
         if not intraday:
